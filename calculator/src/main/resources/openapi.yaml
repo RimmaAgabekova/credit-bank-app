@@ -3,12 +3,72 @@ info:
   title: openapi-generation
   version: 1.0.1
 
-paths: {
-}
 servers:
   - url: http://localhost:8080/
 
+
+paths:
+  /api/v1/calculator/offers:
+    post:
+      tags:
+        - CalculatorController
+      summary: расчёт возможных условий кредита
+      operationId: offers
+      requestBody:
+        $ref: '#/components/requestBodies/offersRequest'
+      responses:
+        200:
+          description: успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/LoanOfferDTO'
+        400:
+          description: некорректные данные
+        404:
+          description: не найдено
+
+
+  /api/v1/calculator/calc:
+    post:
+      tags:
+        - CalculatorController
+      summary: валидация присланных данных + скоринг данных + полный расчет параметров кредита
+      operationId: calc
+      requestBody:
+        $ref: '#/components/requestBodies/calcRequest'
+      responses:
+        200:
+          description: успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditDTO'
+
+        400:
+          description: некорректные данные
+        404:
+          description: не найдено
+
 components:
+  requestBodies:
+    offersRequest:
+      description: Расчёт возможных условий кредита.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoanStatementRequestDTO'
+
+    calcRequest:
+      description: Валидация присланных данных + скоринг данных + полный расчет параметров кредита.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ScoringDataDTO'
   schemas:
 
     LoanStatementRequestDTO:
