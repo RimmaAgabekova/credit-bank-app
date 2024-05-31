@@ -1,34 +1,29 @@
 package ru.neoflex.calculator.services;
 
-
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.neoflex.calculator.exceptions.CalcException;
 import ru.neoflex.calculator.model.dto.EmploymentDTO;
 import ru.neoflex.calculator.model.dto.ScoringDataDTO;
 
-
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDate;
 
 @Service
 @Slf4j
 public class ScoringService {
 
-    
     @Value("${app.base-rate}")
     public BigDecimal baseRate;
 
     public BigDecimal currentRate;
 
     public BigDecimal getCurrentRate(Boolean isInsuranceEnabled, Boolean isSalaryClient) {
-        currentRate = new BigDecimal(baseRate.toString());
+        currentRate =  new BigDecimal(baseRate.toString());
 
         if (isInsuranceEnabled) {
             if (isSalaryClient) {
@@ -53,6 +48,7 @@ public class ScoringService {
 
         if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.UNEMPLOYED) {
             possibleRejection.add("Отказ: Причина - безработный");
+            throw new CalcException(possibleRejection.toString());
         } else {
             if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.SELF_EMPLOYED) {
                 log.info("Клиент самозанятый - увеличили ставку на 1 п.п.");
@@ -74,14 +70,17 @@ public class ScoringService {
 
             if (scoringData.getAmount().compareTo(employment.getSalary().multiply(BigDecimal.valueOf(25))) > 0) {
                 possibleRejection.add("Отказ: Причина - заработная плата не соответсвует сумме займа клиента");
+                throw new CalcException(possibleRejection.toString());
             }
 
             if (employment.getWorkExperienceTotal() < 18) {
                 possibleRejection.add("Отказ: Причина - общий стаж работы менее 18 месяцев");
+                throw new CalcException(possibleRejection.toString());
             }
 
             if (employment.getWorkExperienceCurrent() < 3) {
                 possibleRejection.add("Отказ - Причина - стаж работы на текущем месте работы менее 3 месяцев");
+                throw new CalcException(possibleRejection.toString());
             }
         }
 
@@ -97,6 +96,7 @@ public class ScoringService {
         long age = ChronoUnit.YEARS.between(scoringData.getBirthdate(), LocalDate.now());
         if (age < 20 || age > 65) {
             possibleRejection.add("Отказ: Причина - клиент не соответсвует возрасту выдачи кредитов");
+            throw new CalcException(possibleRejection.toString());
         }
 
         if (scoringData.getGender() == ScoringDataDTO.GenderEnum.FEMALE && (age > 32 && age < 60)) {
@@ -110,11 +110,5 @@ public class ScoringService {
             currentRate.add(BigDecimal.valueOf(7));
         }
 
-        if (possibleRejection.size() > 0) {
-            throw new CalcException(possibleRejection.toString());
-        }
-
         log.info("Конец скоринга");
-
-    }
-}
+    }}

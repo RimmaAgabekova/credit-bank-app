@@ -3,7 +3,6 @@ package ru.neoflex.calculator.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import ru.neoflex.calculator.model.dto.CreditDTO;
 import ru.neoflex.calculator.model.dto.LoanOfferDTO;

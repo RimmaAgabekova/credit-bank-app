@@ -18,7 +18,6 @@ public class OfferService {
     private final ScoringService scoringService;
 
     public List<LoanOfferDTO> generateOffers(LoanStatementRequestDTO request) {
-        List<LoanOfferDTO> list;
         return List.of(
                 createOffer(false, false, request),
                 createOffer(false, true, request),
