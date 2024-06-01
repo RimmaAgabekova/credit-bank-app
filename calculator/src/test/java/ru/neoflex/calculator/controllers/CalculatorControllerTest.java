@@ -17,6 +17,8 @@ import ru.neoflex.calculator.services.OfferService;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CalculatorControllerTest {
@@ -35,14 +37,19 @@ class CalculatorControllerTest {
         ResponseEntity<List<LoanOfferDTO>> response = calculatorController.offers(loanStatementRequestDTO);
 
         assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        assertNotNull(response.getBody());
     }
     @Test
     void testForCalc() {
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO();
+        CreditDTO creditDTO = new CreditDTO();
 
+        when(calcService.calculateCredit(scoringDataDTO)).thenReturn(creditDTO);
         ResponseEntity<CreditDTO> response = calculatorController.calc(scoringDataDTO);
 
         assertEquals(HttpStatus.OK.value(), response.getStatusCode().value());
+        assertNotNull(response.getBody());
+
     }
 
 }
