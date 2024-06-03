@@ -3,106 +3,112 @@ package ru.neoflex.calculator.services;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.neoflex.calculator.exceptions.CalcException;
+import ru.neoflex.calculator.exceptions.ScoringException;
 import ru.neoflex.calculator.model.dto.EmploymentDTO;
 import ru.neoflex.calculator.model.dto.ScoringDataDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Service
 public class ScoringService {
 
-    @Value("${app.base-rate}")
     public BigDecimal baseRate;
 
-    public BigDecimal currentRate;
+    @Value("${app.base-rate}")
+    public void setBaseRate(String baseRateFromProps) {
+        log.info("baseRateFromProps - " + baseRateFromProps);
+        baseRate = new BigDecimal(baseRateFromProps);
+    }
 
-    public BigDecimal getCurrentRate(Boolean isInsuranceEnabled, Boolean isSalaryClient) {
-        currentRate = new BigDecimal(baseRate.toString());
+
+    public BigDecimal getCurrentRateForOffers(Boolean isInsuranceEnabled, Boolean isSalaryClient) {
+        BigDecimal rate = baseRate;
 
         if (isInsuranceEnabled) {
             if (isSalaryClient) {
+                rate = rate.subtract(BigDecimal.valueOf(1));
+            } else {
+                rate = rate.subtract(BigDecimal.valueOf(3));
+            }
+        }
+        log.info("currentRate - " + rate);
+
+        return rate;
+    }
+
+    public BigDecimal executeScoring(ScoringDataDTO scoringData) {
+        log.info("Начало скоринга");
+
+        BigDecimal currentRate = baseRate;
+
+        if (scoringData.getIsInsuranceEnabled()) {
+            if (scoringData.getIsSalaryClient()) {
                 currentRate = currentRate.subtract(BigDecimal.valueOf(1));
             } else {
                 currentRate = currentRate.subtract(BigDecimal.valueOf(3));
             }
         }
-
-        return currentRate;
-    }
-
-    public void scoring(ScoringDataDTO scoringData) throws CalcException {
-
-        log.info("Начало скоринга");
-
-        currentRate = baseRate;
+        log.info("currentRate - " + currentRate);
 
         EmploymentDTO employment = scoringData.getEmployment();
 
-
         if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.UNEMPLOYED) {
-            throw new CalcException("Отказ: Причина - безработный");
+            throw new ScoringException("Отказ: Причина - безработный");
         } else {
             if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.SELF_EMPLOYED) {
-                log.info("Клиент самозанятый - увеличили ставку на 1 п.п.");
-                currentRate.add(BigDecimal.valueOf(1));
+                currentRate = currentRate.add(BigDecimal.valueOf(1));
             } else if (employment.getEmploymentStatus() == EmploymentDTO.EmploymentStatusEnum.BUSINESS_OWNER) {
-                log.info("Клиент владелец бизнеса - увеличили ставку на 2 п.п.");
-                currentRate.add(BigDecimal.valueOf(2));
+                currentRate = currentRate.add(BigDecimal.valueOf(2));
             }
-
 
             if (employment.getPosition() == EmploymentDTO.PositionEnum.MID_MANAGER) {
-                log.info("Клиент менеджер среднего звена - снизили ставку на 2 п.п.");
-                currentRate.subtract(BigDecimal.valueOf(2));
+                currentRate = currentRate.subtract(BigDecimal.valueOf(2));
+                log.info("менеджер");
             }
             if (employment.getPosition() == EmploymentDTO.PositionEnum.TOP_MANAGER) {
-                log.info("Клиент топ-менеджер - снизили ставку на 3 п.п.");
-                currentRate.subtract(BigDecimal.valueOf(3));
+                currentRate = currentRate.subtract(BigDecimal.valueOf(3));
             }
 
             if (scoringData.getAmount().compareTo(employment.getSalary().multiply(BigDecimal.valueOf(25))) > 0) {
-                throw new CalcException("Отказ: Причина - заработная плата не соответсвует сумме займа клиента");
+                throw new ScoringException("Отказ: Причина - заработная плата не соответсвует сумме займа клиента");
             }
 
             if (employment.getWorkExperienceTotal() < 18) {
-                throw new CalcException("Отказ: Причина - общий стаж работы менее 18 месяцев");
+                throw new ScoringException("Отказ: Причина - общий стаж работы менее 18 месяцев");
             }
 
             if (employment.getWorkExperienceCurrent() < 3) {
-                throw new CalcException("Отказ - Причина - стаж работы на текущем месте работы менее 3 месяцев");
+                throw new ScoringException("Отказ - Причина - стаж работы на текущем месте работы менее 3 месяцев");
             }
         }
 
         if (scoringData.getMaritalStatus() == ScoringDataDTO.MaritalStatusEnum.MARRIED) {
-            log.info("Клиент замужем/женат - снизили ставку на 3 п.п.");
-            currentRate.subtract(BigDecimal.valueOf(3));
+            log.info("статус - женат");
+            currentRate = currentRate.subtract(BigDecimal.valueOf(3));
         } else if (scoringData.getMaritalStatus() == ScoringDataDTO.MaritalStatusEnum.DIVORCED) {
-            log.info("Клиент разведен - увеличили ставку на 1 п.п.");
-            currentRate.add(BigDecimal.valueOf(1));
+            currentRate = currentRate.add(BigDecimal.valueOf(1));
         }
 
         long age = ChronoUnit.YEARS.between(scoringData.getBirthdate(), LocalDate.now());
         if (age < 20 || age > 65) {
-            throw new CalcException("Отказ: Причина - клиент не соответсвует возрасту выдачи кредитов");
+            throw new ScoringException("Отказ: Причина - клиент не соответсвует возрасту выдачи кредитов");
         }
 
         if (scoringData.getGender() == ScoringDataDTO.GenderEnum.FEMALE && (age > 32 && age < 60)) {
-            log.info("Клиент женщина (возраст от 32 до 60 - снизили ставку на 3 п.п.");
-            currentRate.subtract(BigDecimal.valueOf(3));
+            currentRate = currentRate.subtract(BigDecimal.valueOf(3));
+
+            log.info("возраст от 30 лет");
         } else if (scoringData.getGender() == ScoringDataDTO.GenderEnum.MALE && (age > 30 && age < 55)) {
-            log.info("Клиент мужчина (возраст от 30 до 55 - снизили ставку на 3 п.п.");
-            currentRate.subtract(BigDecimal.valueOf(3));
+            currentRate = currentRate.subtract(BigDecimal.valueOf(3));
         } else if (scoringData.getGender() == ScoringDataDTO.GenderEnum.NON_BINARY) {
-            log.info("Клиент не бинарный - увеличили ставку на 7 п.п.");
-            currentRate.add(BigDecimal.valueOf(7));
+            currentRate = currentRate.add(BigDecimal.valueOf(7));
         }
 
         log.info("Конец скоринга");
+        return currentRate;
     }
+
 }

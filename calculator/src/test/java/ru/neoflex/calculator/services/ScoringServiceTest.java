@@ -8,13 +8,12 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.neoflex.calculator.exceptions.CalcException;
+import ru.neoflex.calculator.exceptions.ScoringException;
 import ru.neoflex.calculator.model.dto.EmploymentDTO;
 import ru.neoflex.calculator.model.dto.ScoringDataDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,7 +26,7 @@ class ScoringServiceTest {
     static EmploymentDTO employment;
 
     @Value("${app.base-rate}")
-    public BigDecimal baseRate;
+    public String baseRate;
 
 
     @InjectMocks
@@ -61,17 +60,17 @@ class ScoringServiceTest {
 
     @Test
     void getCurrentRate() {
-        BigDecimal baseRate = BigDecimal.valueOf(16);
+        String baseRate = "16";
         BigDecimal currentRate = BigDecimal.valueOf(1);
 
-        scoringService.baseRate = baseRate;
+        scoringService.setBaseRate(baseRate);
 
         Boolean isInsuranceEnabled = true;
         Boolean isSalaryClient = true;
 
-        BigDecimal actual = baseRate.subtract(currentRate);
+        BigDecimal actual = scoringService.baseRate.subtract(currentRate);
 
-        assertEquals(actual, scoringService.getCurrentRate(isInsuranceEnabled, isSalaryClient));
+        assertEquals(actual, scoringService.getCurrentRateForOffers(isInsuranceEnabled, isSalaryClient));
     }
 
     @Test
@@ -80,8 +79,8 @@ class ScoringServiceTest {
 
         String unEmploymentException = "Отказ: Причина - безработный";
 
-        CalcException calcException = assertThrows(CalcException.class, () -> scoringService.scoring(scoringData));
-        assertEquals(unEmploymentException, calcException.getMessage());
+        ScoringException scoringException = assertThrows(ScoringException.class, () -> scoringService.executeScoring(scoringData));
+        assertEquals(unEmploymentException, scoringException.getMessage());
     }
     @Test
     void testWorkExperience() {
@@ -91,13 +90,13 @@ class ScoringServiceTest {
         String employmentTotalException = "Отказ: Причина - общий стаж работы менее 18 месяцев";
         String employmentCurrentException = "Отказ - Причина - стаж работы на текущем месте работы менее 3 месяцев";
 
-        CalcException calcException = assertThrows(CalcException.class, () -> scoringService.scoring(scoringData));
-        assertEquals(employmentTotalException, calcException.getMessage());
+        ScoringException scoringException = assertThrows(ScoringException.class, () -> scoringService.executeScoring(scoringData));
+        assertEquals(employmentTotalException, scoringException.getMessage());
 
         employment.setWorkExperienceTotal(18);
         employment.setWorkExperienceCurrent(2);
-        calcException = assertThrows(CalcException.class, ()-> scoringService.scoring(scoringData));
-        assertEquals(employmentCurrentException, calcException.getMessage());
+        scoringException = assertThrows(ScoringException.class, ()-> scoringService.executeScoring(scoringData));
+        assertEquals(employmentCurrentException, scoringException.getMessage());
     }
     @Test
     void testEmploymentSalary(){
@@ -106,8 +105,8 @@ class ScoringServiceTest {
         scoringData.setAmount(new BigDecimal("1000000"));
         employment.setSalary(new BigDecimal("35000"));
 
-        CalcException calcException = assertThrows(CalcException.class, () -> scoringService.scoring(scoringData));
-        assertEquals(badSalary, calcException.getMessage());
+        ScoringException scoringException = assertThrows(ScoringException.class, () -> scoringService.executeScoring(scoringData));
+        assertEquals(badSalary, scoringException.getMessage());
 
     }
 
@@ -116,10 +115,10 @@ class ScoringServiceTest {
         String badSalary = "Отказ: Причина - клиент не соответсвует возрасту выдачи кредитов";
         scoringData.setBirthdate(LocalDate.of(2005, 12, 12));
 
-        scoringService.baseRate = baseRate;
+        scoringService.setBaseRate(baseRate);
 
-        CalcException calcException = assertThrows(CalcException.class, () -> scoringService.scoring(scoringData));
-        assertEquals(badSalary, calcException.getMessage());
+        ScoringException scoringException = assertThrows(ScoringException.class, () -> scoringService.executeScoring(scoringData));
+        assertEquals(badSalary, scoringException.getMessage());
 
     }
 }

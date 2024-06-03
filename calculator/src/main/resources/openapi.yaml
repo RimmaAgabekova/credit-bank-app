@@ -6,7 +6,6 @@ info:
 servers:
   - url: http://localhost:8080/
 
-
 paths:
   /api/v1/calculator/offers:
     post:
@@ -27,9 +26,6 @@ paths:
                   $ref: '#/components/schemas/LoanOfferDTO'
         400:
           description: некорректные данные
-        404:
-          description: не найдено
-
 
   /api/v1/calculator/calc:
     post:
@@ -46,11 +42,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreditDTO'
-
         400:
           description: некорректные данные
-        404:
-          description: не найдено
 
 components:
   requestBodies:
