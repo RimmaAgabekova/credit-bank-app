@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class HandlerScoringException {
-
     @ExceptionHandler({ScoringException.class, ValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody

@@ -121,13 +121,7 @@ public class CalcService {
                 scoringData.getAmount()
         );
 
-        BigDecimal monthlyPayment = getMonthlyPayment(
-                totalAmount,
-                scoringData.getTerm(),
-                rate
-        );
-
-
+        BigDecimal monthlyPayment = getMonthlyPayment(totalAmount, scoringData.getTerm(),rate);
 
         return CreditDTO.builder()
                 .amount(totalAmount)

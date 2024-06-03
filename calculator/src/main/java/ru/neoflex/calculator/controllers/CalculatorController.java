@@ -21,7 +21,7 @@ public class CalculatorController implements CalculatorControllerApi {
 
     @Override
     public List<LoanOfferDTO> offers(LoanStatementRequestDTO loanStatementRequest) {
-        return offerService.generateOffers(loanStatementRequest) ;
+        return offerService.generateOffers(loanStatementRequest);
     }
 
     @Override
