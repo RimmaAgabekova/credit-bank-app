@@ -21,8 +21,6 @@ import java.util.List;
 public class CalcService {
 
     public final ScoringService scoringService;
-    private static BigDecimal totalAmount;
-
     private static final BigDecimal INSURANCE_PRICE = BigDecimal.valueOf(100000.00);
     private static final Integer BASE_PERIODS_AMOUNT_IN_YEAR = 12;
     private static final Integer DEFAULT_BINARY_SCALE = 2;
@@ -33,7 +31,7 @@ public class CalcService {
 
     public BigDecimal calculateTotalAmount(Boolean isInsuranceEnabled, Boolean isSalaryClient,
                                            BigDecimal amount) {
-        totalAmount = amount;
+        BigDecimal totalAmount = amount;
 
         if (isInsuranceEnabled && !isSalaryClient) {
             totalAmount = totalAmount.add(INSURANCE_PRICE);
@@ -41,7 +39,7 @@ public class CalcService {
         return totalAmount;
     }
 
-    public BigDecimal getMonthlyPayment(BigDecimal totalAmount, Integer term, BigDecimal rate) {
+    public BigDecimal getMonthlyPayment(BigDecimal amount, Integer term, BigDecimal rate) {
         log.info("Начали расчет ежемесячного платежа");
 
         BigDecimal monthRate = rate.divide(BigDecimal.valueOf(BASE_PERIODS_AMOUNT_IN_YEAR), DEFAULT_DECIMAL_SCALE, RoundingMode.CEILING);
@@ -55,7 +53,7 @@ public class CalcService {
                 .divide(intermediateCoefficient.subtract(BigDecimal.ONE), DEFAULT_DECIMAL_SCALE, RoundingMode.CEILING);
 
 
-        BigDecimal monthlyPayment = totalAmount.multiply(annuityCoefficient).setScale(DEFAULT_BINARY_SCALE, RoundingMode.CEILING);
+        BigDecimal monthlyPayment = amount.multiply(annuityCoefficient).setScale(DEFAULT_BINARY_SCALE, RoundingMode.CEILING);
 
         log.info("Закончили расчет ежемесячного платежа");
         return monthlyPayment;
@@ -69,13 +67,14 @@ public class CalcService {
                 RoundingMode.CEILING)).setScale(DEFAULT_BINARY_SCALE, RoundingMode.CEILING);
     }
 
-    public List<PaymentScheduleElementDTO> getMonthlyPaymentSchedule(BigDecimal totalAmount,
-                                                                      BigDecimal rate,
-                                                                      Integer term,
-                                                                      BigDecimal monthlyPayment) {
+    public List<PaymentScheduleElementDTO> getMonthlyPaymentSchedule(BigDecimal amount,
+                                                                     BigDecimal rate,
+                                                                     Integer term,
+                                                                     BigDecimal monthlyPayment) {
+
 
         List<PaymentScheduleElementDTO> paymentSchedule = new ArrayList<>();
-        BigDecimal remainingDebt = totalAmount.setScale(DEFAULT_BINARY_SCALE, RoundingMode.CEILING);
+        BigDecimal remainingDebt = amount.setScale(DEFAULT_BINARY_SCALE, RoundingMode.CEILING);
 
         for (int i = 0; i < term - 1; i++) {
 
@@ -94,7 +93,6 @@ public class CalcService {
                     .build());
         }
 
-
         BigDecimal lastInterestPayment = calculateInterest(paymentSchedule.get(paymentSchedule.size() - 1).getRemainingDebt(), rate)
                 .setScale(DEFAULT_BINARY_SCALE, RoundingMode.CEILING);
         BigDecimal lastTotalPayment = paymentSchedule.get(paymentSchedule.size() - 1).getRemainingDebt().add(lastInterestPayment);
@@ -111,7 +109,6 @@ public class CalcService {
         return paymentSchedule;
     }
 
-
     public CreditDTO calculateCredit(ScoringDataDTO scoringData) {
 
         BigDecimal rate = scoringService.executeScoring(scoringData);
@@ -122,17 +119,17 @@ public class CalcService {
                 scoringData.getAmount()
         );
 
-        BigDecimal monthlyPayment = getMonthlyPayment(totalAmount, scoringData.getTerm(),rate);
+        BigDecimal monthlyPayment = getMonthlyPayment(psk, scoringData.getTerm(), rate);
 
         return CreditDTO.builder()
-                .amount(totalAmount)
+                .amount(scoringData.getAmount())
                 .term(scoringData.getTerm())
                 .monthlyPayment(monthlyPayment)
                 .rate(rate)
                 .psk(psk)
                 .isInsuranceEnabled(scoringData.getIsInsuranceEnabled())
                 .isSalaryClient(scoringData.getIsSalaryClient())
-                .paymentSchedule(getMonthlyPaymentSchedule(totalAmount, rate, scoringData.getTerm(), monthlyPayment))
+                .paymentSchedule(getMonthlyPaymentSchedule(psk, rate, scoringData.getTerm(), monthlyPayment))
                 .build();
     }
 }

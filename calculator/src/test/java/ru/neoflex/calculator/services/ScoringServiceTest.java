@@ -24,16 +24,8 @@ import static ru.neoflex.calculator.model.dto.ScoringDataDTO.GenderEnum.*;
 import static ru.neoflex.calculator.model.dto.ScoringDataDTO.MaritalStatusEnum.DIVORCED;
 import static ru.neoflex.calculator.model.dto.ScoringDataDTO.MaritalStatusEnum.MARRIED;
 
-@SpringBootTest
-@ExtendWith(MockitoExtension.class)
 class ScoringServiceTest {
-
-    @Value("${app.base-rate}")
-    public String baseRate;
-
-    @InjectMocks
     private static ScoringService scoringService;
-
     static ScoringDataDTO scoringData;
     static EmploymentDTO employment;
 
@@ -42,6 +34,8 @@ class ScoringServiceTest {
         employment = new EmploymentDTO();
         scoringData = new ScoringDataDTO()
                 .employment(employment);
+        scoringService = new ScoringService();
+        scoringService.baseRate = BigDecimal.valueOf(16);
     }
 
     @BeforeEach
@@ -65,10 +59,6 @@ class ScoringServiceTest {
 
     @Test
     void testCurrentRateForOffers() {
-        String baseRate = "16";
-
-        scoringService.setBaseRate(baseRate);
-
         BigDecimal actualForInsuranceSalaryClient = scoringService.baseRate.subtract(BigDecimal.valueOf(1));
         BigDecimal actualForInsurance = scoringService.baseRate.subtract(BigDecimal.valueOf(3));
 
@@ -86,57 +76,38 @@ class ScoringServiceTest {
         assertEquals(unEmploymentException, scoringException.getMessage());
     }
 
-
     @Test
     public void testWhenEmploymentStatusSelfManager() {
-        String baseRate = "16";
-        scoringService.setBaseRate(baseRate);
-
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", MALE, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(SELF_EMPLOYED, "123", BigDecimal.valueOf(100000), TOP_MANAGER, 20, 20), "12312", true, true);
         BigDecimal actual = scoringService.executeScoring(scoringDataDTO);
-
 
         assertEquals(BigDecimal.valueOf(10), actual);
     }
 
     @Test
     public void testWhenEmploymentStatusBusinessOwner() {
-        String baseRate = "16";
-        scoringService.setBaseRate(baseRate);
-
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", MALE, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(BUSINESS_OWNER, "123", BigDecimal.valueOf(100000), TOP_MANAGER, 20, 20), "12312", true, true);
         BigDecimal actual = scoringService.executeScoring(scoringDataDTO);
 
-
         assertEquals(BigDecimal.valueOf(11), actual);
     }
 
-
-
     @Test
     public void testWhenGenderFemaleMarried() {
-        String baseRate = "16";
-        scoringService.setBaseRate(baseRate);
-
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", FEMALE, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), TOP_MANAGER, 20, 20), "12312", true, true);
         BigDecimal actual = scoringService.executeScoring(scoringDataDTO);
-
 
         assertEquals(BigDecimal.valueOf(9), actual);
     }
 
     @Test
     public void testWhenGenderMale()  {
-
-        String baseRate = "16";
-        scoringService.setBaseRate(baseRate);
-
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", MALE, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), TOP_MANAGER, 20, 20), "12312", true, true);
@@ -147,9 +118,6 @@ class ScoringServiceTest {
 
     @Test
     public void testWhenGenderNonBinary()  {
-        String baseRate = "16";
-        scoringService.setBaseRate(baseRate);
-
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", NON_BINARY, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), TOP_MANAGER, 20, 20), "12312", true, true);
@@ -160,9 +128,6 @@ class ScoringServiceTest {
 
     @Test
     public void testWhenMaritalStatusDivorced()  {
-        String baseRate = "16";
-        scoringService.setBaseRate(baseRate);
-
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", MALE, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", DIVORCED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), TOP_MANAGER, 20, 20), "12312", true, true);
@@ -173,9 +138,6 @@ class ScoringServiceTest {
 
     @Test
     public void testWhenPositionMidManager()  {
-
-        String baseRate = "16";
-        scoringService.setBaseRate(baseRate);
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", FEMALE, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), MID_MANAGER, 20, 20), "12312", true, true);
@@ -209,26 +171,18 @@ class ScoringServiceTest {
 
         ScoringException scoringException = assertThrows(ScoringException.class, () -> scoringService.executeScoring(scoringData));
         assertEquals(badSalary, scoringException.getMessage());
-
     }
-
     @Test
     void testAgeClients(){
         String badSalary = "Отказ: Причина - клиент не соответсвует возрасту выдачи кредитов";
         scoringData.setBirthdate(LocalDate.of(2005, 12, 12));
 
-        scoringService.setBaseRate(baseRate);
-
         ScoringException scoringException = assertThrows(ScoringException.class, () -> scoringService.executeScoring(scoringData));
         assertEquals(badSalary, scoringException.getMessage());
-
     }
 
     @Test
     public void testAgeClientsWhenFemale() {
-        String baseRate = "16";
-        scoringService.setBaseRate(baseRate);
-
         ScoringDataDTO scoringData = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", FEMALE, LocalDate.now().minusYears(55), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), MID_MANAGER, 20, 20), "12312", true, true);
@@ -239,9 +193,6 @@ class ScoringServiceTest {
 
     @Test
     public void testAgeClientsWhenMale() {
-        String baseRate = "16";
-        scoringService.setBaseRate(baseRate);
-
         ScoringDataDTO scoringData = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", MALE, LocalDate.now().minusYears(45), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), MID_MANAGER, 20, 20), "12312", true, true);

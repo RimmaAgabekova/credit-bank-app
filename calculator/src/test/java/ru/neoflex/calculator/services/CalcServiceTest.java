@@ -22,7 +22,6 @@ import static ru.neoflex.calculator.model.dto.ScoringDataDTO.MaritalStatusEnum.M
 
 @SpringBootTest
 class CalcServiceTest {
-    ScoringService scoringService = new ScoringService();
 
     @Autowired
     CalcService calcService;
@@ -35,7 +34,6 @@ class CalcServiceTest {
         employment = new EmploymentDTO();
         scoringData = new ScoringDataDTO()
                 .employment(employment);
-
     }
 
     @BeforeEach
@@ -84,7 +82,6 @@ class CalcServiceTest {
         BigDecimal actual = new BigDecimal("1232.88");
 
         assertEquals(actual, calcService.calculateInterest(remainingDebt, rate));
-
     }
 
     @Test
@@ -103,10 +100,8 @@ class CalcServiceTest {
         assertEquals(lastPayment.getTotalPayment(), lastPayment.getDebtPayment().add(lastPayment.getInterestPayment()));
     }
 
-
     @Test
     void getCreditDtoShouldReturnFilledObject() {
-        scoringService.setBaseRate("16");
 
         CreditDTO creditDto = calcService.calculateCredit(scoringData);
 

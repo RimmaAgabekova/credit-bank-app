@@ -14,11 +14,8 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 @Service
 public class ScoringService {
-    public BigDecimal baseRate;
     @Value("${app.base-rate}")
-    public void setBaseRate(String baseRateFromProps) {
-        baseRate = new BigDecimal(baseRateFromProps);
-    }
+    public BigDecimal baseRate;
 
     public BigDecimal getCurrentRateForOffers(Boolean isInsuranceEnabled, Boolean isSalaryClient) {
         BigDecimal rate = baseRate;
