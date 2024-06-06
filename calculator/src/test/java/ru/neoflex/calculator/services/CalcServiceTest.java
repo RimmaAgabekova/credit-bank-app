@@ -3,31 +3,29 @@ package ru.neoflex.calculator.services;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.neoflex.calculator.model.dto.CreditDTO;
 import ru.neoflex.calculator.model.dto.EmploymentDTO;
+import ru.neoflex.calculator.model.dto.PaymentScheduleElementDTO;
 import ru.neoflex.calculator.model.dto.ScoringDataDTO;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.*;
+import static ru.neoflex.calculator.model.dto.EmploymentDTO.EmploymentStatusEnum.EMPLOYED;
+import static ru.neoflex.calculator.model.dto.ScoringDataDTO.GenderEnum.FEMALE;
+import static ru.neoflex.calculator.model.dto.ScoringDataDTO.MaritalStatusEnum.MARRIED;
 
 @SpringBootTest
-@ExtendWith(MockitoExtension.class)
 class CalcServiceTest {
-    @Value("${app.base-rate}")
-    public BigDecimal baseRate;
-    @Mock
-    public ScoringService scoringService;
-    @InjectMocks
-    private CalcService calcService;
+    ScoringService scoringService = new ScoringService();
+
+    @Autowired
+    CalcService calcService;
 
     static ScoringDataDTO scoringData;
     static EmploymentDTO employment;
@@ -37,6 +35,7 @@ class CalcServiceTest {
         employment = new EmploymentDTO();
         scoringData = new ScoringDataDTO()
                 .employment(employment);
+
     }
 
     @BeforeEach
@@ -46,37 +45,36 @@ class CalcServiceTest {
         scoringData.setIsSalaryClient(false);
         scoringData.setIsInsuranceEnabled(true);
 
+        scoringData.setFirstName("Тесто");
+        scoringData.setLastName("Тестовый");
+        scoringData.setMiddleName("Тесточко");
+
         scoringData.setBirthdate(LocalDate.of(1997, 12, 18));
-        scoringData.setGender(ScoringDataDTO.GenderEnum.FEMALE);
-        scoringData.setMaritalStatus(ScoringDataDTO.MaritalStatusEnum.MARRIED);
+        scoringData.setGender(FEMALE);
+        scoringData.setMaritalStatus(MARRIED);
         scoringData.setDependentAmount(0);
 
         employment.setSalary(new BigDecimal("50000.00"));
         employment.setPosition(EmploymentDTO.PositionEnum.WORKER);
-        employment.employmentStatus(EmploymentDTO.EmploymentStatusEnum.EMPLOYED);
+        employment.employmentStatus(EMPLOYED);
         employment.setWorkExperienceCurrent(10);
         employment.setWorkExperienceTotal(20);
     }
 
     @Test
     void calculateTotalAmount() {
-        Boolean isInsuranceEnabled = true;
-        Boolean isSalaryClient = false;
-        BigDecimal insurancePrice = BigDecimal.valueOf(100000.00);
-        BigDecimal amount = BigDecimal.valueOf(1000000.00);
-        BigDecimal actual = amount.add(insurancePrice);
+        BigDecimal totalAmount = calcService.calculateTotalAmount(true, false,
+                new BigDecimal("100000").setScale(2, RoundingMode.CEILING));
 
-        assertEquals(actual, calcService.calculateTotalAmount(isInsuranceEnabled, isSalaryClient, amount));
+        assertEquals(new BigDecimal("200000.00"), totalAmount);
     }
 
     @Test
-    void getMonthlyPayment() {
-        BigDecimal amount = new BigDecimal("150000.00");
-        BigDecimal rate = new BigDecimal("15.00");
-        int term = 24;
-        BigDecimal actual = new BigDecimal("7273.00");
+    void calculateMonthlyPayment() {
+        BigDecimal monthlyPayment = calcService.getMonthlyPayment(
+                new BigDecimal("1000000"), 12, new BigDecimal("15"));
 
-        assertEquals(actual, calcService.getMonthlyPayment(amount, term, rate));
+        assertEquals(new BigDecimal("90258.32"), monthlyPayment);
     }
 
     @Test
@@ -90,8 +88,37 @@ class CalcServiceTest {
     }
 
     @Test
-    void calculateCredit() {
+    void getPaymentSchedule() {
 
+        List<PaymentScheduleElementDTO> paymentSchedule = calcService.getMonthlyPaymentSchedule(
+                new BigDecimal("1000000"), new BigDecimal("10"), 15, new BigDecimal("87915.89"));
+
+        assertEquals(15, paymentSchedule.size());
+
+        PaymentScheduleElementDTO lastPayment = paymentSchedule.get(paymentSchedule.size() - 1);
+
+        assertEquals(14, lastPayment.getNumber());
+        assertEquals(paymentSchedule.get(0).getDate().plusMonths(14), lastPayment.getDate());
+        assertEquals(new BigDecimal("0.00"), lastPayment.getRemainingDebt());
+        assertEquals(lastPayment.getTotalPayment(), lastPayment.getDebtPayment().add(lastPayment.getInterestPayment()));
     }
+
+
+    @Test
+    void getCreditDtoShouldReturnFilledObject() {
+        scoringService.setBaseRate("16");
+
+        CreditDTO creditDto = calcService.calculateCredit(scoringData);
+
+        assertNotNull(creditDto.getAmount());
+        assertNotEquals(0, creditDto.getTerm());
+        assertNotNull(creditDto.getMonthlyPayment());
+        assertNotNull(creditDto.getRate());
+        assertNotNull(creditDto.getPsk());
+        assertEquals(scoringData.getIsInsuranceEnabled(), creditDto.getIsInsuranceEnabled());
+        assertEquals(scoringData.getIsSalaryClient(), creditDto.getIsSalaryClient());
+        assertNotNull(creditDto.getPaymentSchedule());
+    }
+
 
 }
