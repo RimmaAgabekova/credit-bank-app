@@ -17,7 +17,6 @@ public class ScoringService {
     public BigDecimal baseRate;
     @Value("${app.base-rate}")
     public void setBaseRate(String baseRateFromProps) {
-        log.info("baseRateFromProps - " + baseRateFromProps);
         baseRate = new BigDecimal(baseRateFromProps);
     }
 
@@ -31,8 +30,6 @@ public class ScoringService {
                 rate = rate.subtract(BigDecimal.valueOf(3));
             }
         }
-        log.info("currentRate - " + rate);
-
         return rate;
     }
 
@@ -48,7 +45,6 @@ public class ScoringService {
                 currentRate = currentRate.subtract(BigDecimal.valueOf(3));
             }
         }
-        log.info("currentRate - " + currentRate);
 
         EmploymentDTO employment = scoringData.getEmployment();
 
@@ -63,7 +59,6 @@ public class ScoringService {
 
             if (employment.getPosition() == EmploymentDTO.PositionEnum.MID_MANAGER) {
                 currentRate = currentRate.subtract(BigDecimal.valueOf(2));
-                log.info("менеджер");
             }
             if (employment.getPosition() == EmploymentDTO.PositionEnum.TOP_MANAGER) {
                 currentRate = currentRate.subtract(BigDecimal.valueOf(3));
@@ -83,7 +78,6 @@ public class ScoringService {
         }
 
         if (scoringData.getMaritalStatus() == ScoringDataDTO.MaritalStatusEnum.MARRIED) {
-            log.info("статус - женат");
             currentRate = currentRate.subtract(BigDecimal.valueOf(3));
         } else if (scoringData.getMaritalStatus() == ScoringDataDTO.MaritalStatusEnum.DIVORCED) {
             currentRate = currentRate.add(BigDecimal.valueOf(1));
@@ -96,8 +90,6 @@ public class ScoringService {
 
         if (scoringData.getGender() == ScoringDataDTO.GenderEnum.FEMALE && (age > 32 && age < 60)) {
             currentRate = currentRate.subtract(BigDecimal.valueOf(3));
-
-            log.info("возраст от 30 лет");
         } else if (scoringData.getGender() == ScoringDataDTO.GenderEnum.MALE && (age > 30 && age < 55)) {
             currentRate = currentRate.subtract(BigDecimal.valueOf(3));
         } else if (scoringData.getGender() == ScoringDataDTO.GenderEnum.NON_BINARY) {

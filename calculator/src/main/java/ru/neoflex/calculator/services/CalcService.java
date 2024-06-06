@@ -2,6 +2,7 @@ package ru.neoflex.calculator.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.neoflex.calculator.model.dto.CreditDTO;
 import ru.neoflex.calculator.model.dto.PaymentScheduleElementDTO;
@@ -19,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CalcService {
 
-    private final ScoringService scoringService;
+    public final ScoringService scoringService;
     private static BigDecimal totalAmount;
 
     private static final BigDecimal INSURANCE_PRICE = BigDecimal.valueOf(100000.00);
@@ -68,7 +69,7 @@ public class CalcService {
                 RoundingMode.CEILING)).setScale(DEFAULT_BINARY_SCALE, RoundingMode.CEILING);
     }
 
-    private List<PaymentScheduleElementDTO> getMonthlyPaymentSchedule(BigDecimal totalAmount,
+    public List<PaymentScheduleElementDTO> getMonthlyPaymentSchedule(BigDecimal totalAmount,
                                                                       BigDecimal rate,
                                                                       Integer term,
                                                                       BigDecimal monthlyPayment) {
@@ -133,6 +134,5 @@ public class CalcService {
                 .isSalaryClient(scoringData.getIsSalaryClient())
                 .paymentSchedule(getMonthlyPaymentSchedule(totalAmount, rate, scoringData.getTerm(), monthlyPayment))
                 .build();
-
     }
 }
