@@ -25,12 +25,16 @@ public class OfferService {
             throw new ScoringException("Отказ: Клиент не соответсвует возрасту выдачи кредитов");
         }
 
-        return List.of(
+        List<LoanOfferDTO> listOffers = new ArrayList<>(List.of(
                 createOffer(false, false, request),
                 createOffer(false, true, request),
                 createOffer(true, false, request),
                 createOffer(true, true, request)
-        );
+        ));
+
+        listOffers.sort((o1, o2) -> o2.getRate().compareTo(o1.getRate()));
+
+        return listOffers;
     }
     private LoanOfferDTO createOffer(Boolean isInsuranceEnabled, Boolean isSalaryClient, LoanStatementRequestDTO request) {
 
