@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-employment
+      author: Agabekova
+      changes:
+        - createTable:
+            tableName: employment
+            columns:
+              - column:
+                  name: employment
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+
+              - column:
+                  name: status
+                  type: varchar
+
+              - column:
+                  name: employer_inn
+                  type: varchar
+
+              - column:
+                  name: salary
+                  type: decimal
+
+              - column:
+                  name: position
+                  type: varchar
+
+              - column:
+                  name: work_experience_total
+                  type: int
+
+              - column:
+                  name: work_experience_current
+                  type: int

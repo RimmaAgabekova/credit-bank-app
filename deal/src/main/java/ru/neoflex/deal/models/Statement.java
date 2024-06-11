@@ -1,0 +1,55 @@
+package ru.neoflex.deal.models;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import ru.neoflex.deal.model.dto.LoanOfferDTO;
+import ru.neoflex.deal.model.dto.StatementStatusHistoryDTO;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
+@Data
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@SequenceGenerator(name = "statementSeqGenerator", sequenceName = "statement_id_seq", allocationSize = 1)
+public class Statement {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID statementId;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "client_id")
+    private Client clientId;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "credit_id")
+    private Credit creditId;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private StatementStatusHistoryDTO.StatusEnum status;
+
+    @Column
+    private LocalDate creationDate;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private LoanOfferDTO appliedOffer;
+
+    @Column
+    private LocalDate signDate;
+
+    @Column
+    private Integer sesCode;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private List<StatementStatusHistoryDTO> statusHistory;
+
+}
