@@ -1,6 +1,5 @@
 package ru.neoflex.deal.models;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import ru.neoflex.deal.model.dto.PaymentScheduleElementDTO;
-import ru.neoflex.deal.model.dto.StatementStatusHistoryDTO;
 
 import java.math.BigDecimal;
 import java.util.List;

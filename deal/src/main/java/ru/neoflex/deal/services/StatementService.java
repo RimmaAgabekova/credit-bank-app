@@ -7,16 +7,18 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.neoflex.deal.feign.CalculatorFeignClient;
 import ru.neoflex.deal.model.dto.LoanOfferDTO;
 import ru.neoflex.deal.model.dto.LoanStatementRequestDTO;
+import ru.neoflex.deal.model.dto.StatementStatus;
+import ru.neoflex.deal.model.dto.StatementStatusHistoryDTO;
 import ru.neoflex.deal.models.Client;
 import ru.neoflex.deal.models.Passport;
 import ru.neoflex.deal.models.Statement;
 import ru.neoflex.deal.repositories.ClientRepository;
-import ru.neoflex.deal.repositories.PassportRepository;
 import ru.neoflex.deal.repositories.StatementRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -30,26 +32,39 @@ public class StatementService {
 
     @Transactional
     public List<LoanOfferDTO> createStatement(LoanStatementRequestDTO request) {
-        Client savedClient = createClientByRequest(request);
-        log.info("Создали клиента - "+savedClient.getClientId());
+        Client savedClient = createAndSaveClient(request);
 
-        Statement statement = new Statement();
-        statement.setStatusHistory(new ArrayList<>());
-        statement.setClientId(savedClient);
+        log.info("Создали и сохранили клиента - " + savedClient.getClientId());
 
-        Statement savedStatement = statementRepository.save(statement);
-        log.info("Создали заявку - "+savedStatement.getStatementId());
+        Statement savedStatement = createAndSaveStatement(savedClient);
+
+        log.info("Создали заявку - " + savedStatement.getStatementId());
 
         List<LoanOfferDTO> loanOffers = calculatorFeignClient.offers(request);
+
+        updateStatementStatus(savedStatement, StatementStatus.PREAPPROVAL);
 
         if (loanOffers != null) {
             loanOffers.forEach(offer -> offer.setStatementId(savedStatement.getStatementId()));
         }
+        log.info("данные с микросеривиса calculator" + loanOffers);
         return loanOffers;
     }
 
-    private Client createClientByRequest(LoanStatementRequestDTO request) {
-        log.info("Начинаем создание клента - "+request);
+    @Transactional
+    public Statement createAndSaveStatement(Client client) {
+
+        Statement statement = Statement.builder()
+                .clientId(client)
+                .creationDate(LocalDate.now())
+                .statusHistory(new ArrayList<>())
+                .build();
+
+        return statementRepository.save(statement);
+    }
+
+    @Transactional
+    public Client createAndSaveClient(LoanStatementRequestDTO request) {
 
         Client client = Client.builder()
                 .lastName(request.getLastName())
@@ -66,5 +81,14 @@ public class StatementService {
         return clientRepository.save(client);
     }
 
+    public void updateStatementStatus(Statement statement, StatementStatus status) {
+        statement.setStatus(status);
+        statement.getStatusHistory().add(StatementStatusHistoryDTO.builder()
+                .status(status)
+                .time(LocalDateTime.now())
+                .changeType(StatementStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC)
+                .build());
+
+    }
 
 }

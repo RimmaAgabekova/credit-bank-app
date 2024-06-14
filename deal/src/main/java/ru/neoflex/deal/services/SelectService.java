@@ -1,21 +1,16 @@
 package ru.neoflex.deal.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.neoflex.deal.exception.DealException;
 import ru.neoflex.deal.model.dto.LoanOfferDTO;
-import ru.neoflex.deal.model.dto.StatementStatusHistoryDTO;
+import ru.neoflex.deal.model.dto.StatementStatus;
 import ru.neoflex.deal.models.Statement;
 import ru.neoflex.deal.repositories.StatementRepository;
 
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -23,31 +18,31 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class SelectService {
 
-
     private final StatementRepository statementRepository;
+    private final StatementService statementService;
 
     @Transactional
-    public void applyOffer(LoanOfferDTO loanOffer) {
-        log.info("Получили select - " + loanOffer);
-        Statement statement = statementRepository.findById(loanOffer.getStatementId()).orElseThrow(() ->
-                new DealException("Заявление с идентификатором не найдено"));
+    public void updateStatement(LoanOfferDTO loanOffer) {
 
-        updateStatementStatusById(statement, StatementStatusHistoryDTO.StatusEnum.PREAPPROVAL);
-        log.info("Обновили статус statement - "+statement.getStatementId());
+        Statement statement = getStatementById(loanOffer.getStatementId());
+
+        statementService.updateStatementStatus(statement, StatementStatus.APPROVED);
+
+        log.info("Обновили статус statement - " + statement.getStatementId());
 
         statement.setAppliedOffer(loanOffer);
-        log.info("Установили setAppliedOffer - "+loanOffer);
+        log.info(" принятое предложение установили в поле appliedOffer - " + loanOffer);
+
+        log.info("Заявка сохраняется");
+
         statementRepository.save(statement);
+
     }
 
-    public void updateStatementStatusById(Statement statement, StatementStatusHistoryDTO.StatusEnum status) {
+    public Statement getStatementById(UUID statementId) {
 
-        log.info(String.valueOf(LocalDateTime.now()));
-
-        statement.getStatusHistory().add(StatementStatusHistoryDTO.builder()
-                .status(status)
-                .time(LocalDateTime.now())
-                .changeType(StatementStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC).build()
-        );
+        return statementRepository.findById(statementId)
+                .orElseThrow(() -> new EntityNotFoundException("Заявление с идентификатором не найдено - " + statementId));
     }
+
 }

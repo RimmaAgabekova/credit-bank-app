@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import ru.neoflex.deal.model.dto.LoanOfferDTO;
+import ru.neoflex.deal.model.dto.StatementStatus;
 import ru.neoflex.deal.model.dto.StatementStatusHistoryDTO;
 
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class Statement {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private StatementStatusHistoryDTO.StatusEnum status;
+    private StatementStatus status;
 
     @Column
     private LocalDate creationDate;

@@ -1,6 +1,5 @@
 package ru.neoflex.deal.services;
 
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,7 +9,6 @@ import ru.neoflex.deal.model.dto.*;
 import ru.neoflex.deal.models.*;
 import ru.neoflex.deal.repositories.ClientRepository;
 import ru.neoflex.deal.repositories.CreditRepository;
-import ru.neoflex.deal.repositories.StatementRepository;
 
 import java.util.UUID;
 
@@ -20,45 +18,42 @@ import java.util.UUID;
 @Transactional
 public class CalculateService {
 
-    private final StatementRepository statementRepository;
-    private final ClientRepository clientRepository;
     private final CreditRepository creditRepository;
     private final CalculatorFeignClient calculatorFeignClient;
-
     private final SelectService selectService;
-
+    private final ClientRepository clientRepository;
+    private final StatementService statementService;
 
     @Transactional
-    public void calculateCredit(UUID statementId, FinishRegistrationRequestDto finishRegistrationRequestDto) {
+    public void calculateCredit(UUID statementId, FinishRegistrationRequestDto finishRegistrationRequest) {
+        log.info("Пришел finishRegistrationRequestDto - " + finishRegistrationRequest);
 
-        log.info("Запустили calculateCredit");
-        log.info("statementId - " + statementId);
-        log.info("finishRegistrationRequestDto - " + finishRegistrationRequestDto);
+        log.info("Достаётся из БД заявка по statementId");
+        Statement statement = selectService.getStatementById(statementId);
 
-        Statement statement = statementRepository.findById(statementId).orElseThrow();
-        log.info("Нашли заявку");
-
-        Client client = clientRepository.findById(statement.getClientId().getClientId()).orElseThrow();
-        log.info("Нашли клиента");
-
-        ScoringDataDTO scoringData = buildScoringDataDto(finishRegistrationRequestDto, statement.getAppliedOffer(),
+        log.info("ScoringDataDto насыщается информацией");
+        ScoringDataDTO scoringData = formatScoringDataDto(finishRegistrationRequest, statement.getAppliedOffer(),
                 statement.getClientId());
         log.info("Сформировали scoringData - " + scoringData);
 
         CreditDTO credit = calculatorFeignClient.calc(scoringData);
-        log.info("Вернулся credit");
+        log.info("Отправляется POST запрос в микросервис calculator");
 
-        Credit savedCredit = creditRepository.save(buildCredit(credit));
-        log.info("Сформировали сущность credit и записали в базу");
+        Credit savedCredit = creditRepository.save(formatCredit(credit));
+        log.info("создаётся сущность Credit и сохраняется в базу со статусом CALCULATED");
 
-        selectService.updateStatementStatusById(statement, StatementStatusHistoryDTO.StatusEnum.APPROVED);
-        log.info("Обновили статус по заявке");
+        statementService.updateStatementStatus(statement, StatementStatus.CC_APPROVED);
+        log.info("Обновляется статус, история статусов");
+
+        updateClientData(statement.getClientId(), finishRegistrationRequest);
+        log.info("Обновили данные по клиенту - " + statement.getClientId().getClientId());
 
         statement.setCreditId(savedCredit);
+        log.info("Заявка сохраняется");
         log.info("Всё!)");
     }
 
-    private Credit buildCredit(CreditDTO creditDto) {
+    private Credit formatCredit(CreditDTO creditDto) {
 
         return Credit.builder()
                 .amount(creditDto.getAmount())
@@ -73,11 +68,10 @@ public class CalculateService {
                 .build();
     }
 
-    private ScoringDataDTO buildScoringDataDto(FinishRegistrationRequestDto finishRegistrationRequestDto,
-                                               LoanOfferDTO loanOfferDTO,
-                                               Client client) {
-
-        return ScoringDataDTO.builder()
+    private ScoringDataDTO formatScoringDataDto(FinishRegistrationRequestDto finishRegistrationRequestDto,
+                                                LoanOfferDTO loanOfferDTO,
+                                                Client client) {
+        ScoringDataDTO scoringDataObject = ScoringDataDTO.builder()
                 .amount(loanOfferDTO.getRequestedAmount())
                 .term(loanOfferDTO.getTerm())
                 .firstName(client.getFirstName())
@@ -88,7 +82,6 @@ public class CalculateService {
                 .passportNumber(client.getPassportId().getNumber())
                 .passportIssueDate(finishRegistrationRequestDto.getPassportIssueDate())
                 .passportIssueBranch(finishRegistrationRequestDto.getPassportIssueBranch())
-                .maritalStatus(finishRegistrationRequestDto.getMaritalStatus())
                 .dependentAmount(finishRegistrationRequestDto.getDependentAmount())
                 .employment(EmploymentDTO.builder()
                         .employmentStatus(finishRegistrationRequestDto.getEmployment().getEmploymentStatus())
@@ -102,6 +95,30 @@ public class CalculateService {
                 .isInsuranceEnabled(loanOfferDTO.getIsInsuranceEnabled())
                 .isSalaryClient(loanOfferDTO.getIsSalaryClient())
                 .build();
+
+        scoringDataObject.setMaritalStatus(finishRegistrationRequestDto.getMaritalStatus());
+
+        return scoringDataObject;
+    }
+
+    private void updateClientData(Client client, FinishRegistrationRequestDto finishRegistrationRequest) {
+        client.setGender(finishRegistrationRequest.getGender().toString());
+        client.setMaritalStatus(finishRegistrationRequest.getMaritalStatus().toString());
+        client.setDependentAmount(finishRegistrationRequest.getDependentAmount());
+        client.getPassportId().setIssueBranch(finishRegistrationRequest.getPassportIssueBranch());
+        client.getPassportId().setIssueDate(finishRegistrationRequest.getPassportIssueDate());
+        client.setAccountNumber(finishRegistrationRequest.getAccountNumber());
+        client.setEmploymentId(Employment.builder()
+                .status(finishRegistrationRequest.getEmployment().getEmploymentStatus())
+                .employerInn(finishRegistrationRequest.getEmployment().getEmployerINN())
+                .salary(finishRegistrationRequest.getEmployment().getSalary())
+                .position(finishRegistrationRequest.getEmployment().getPosition())
+                .workExperienceTotal(finishRegistrationRequest.getEmployment().getWorkExperienceTotal())
+                .workExperienceCurrent(finishRegistrationRequest.getEmployment().getWorkExperienceCurrent())
+                .build());
+
+        clientRepository.save(client);
+
     }
 
 }

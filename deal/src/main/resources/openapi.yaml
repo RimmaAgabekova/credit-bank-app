@@ -27,6 +27,8 @@ paths:
                   $ref: '#/components/schemas/LoanOfferDTO'
         400:
           description: некорректные данные
+        404:
+          description: не найдено
 
   /api/v1/deal/offer/select:
     post:
@@ -41,6 +43,8 @@ paths:
           description: успешно
         400:
           description: некорректные данные
+        404:
+          description: не найдено
 
 
   /api/v1/deal/calculate/{statementId}:
@@ -62,6 +66,8 @@ paths:
           description: успешно
         400:
           description: некорректные данные
+        404:
+          description: не найдено
 
 components:
   requestBodies:
@@ -438,16 +444,7 @@ components:
           example: 95000.00
           description: Оставшаяся сумма долга.
 
-    MaritalStatus:
-      title: семейное положение
-      type: string
-      enum:
-        - MARRIED
-        - DIVORCED
-        - SINGLE
-        - WIDOW_WIDOWER
-      example: SINGLE
-      description: Семейное положение клиента.
+
 
     FinishRegistrationRequestDto:
       title: завершение регистрации и полный подсчёт кредита
@@ -491,19 +488,7 @@ components:
       description: История изменений статуса приложения.
       properties:
         status:
-          type: string
-          enum:
-            - PREAPPROVAL
-            - APPROVED
-            - CC_DENIED
-            - CC_APPROVED
-            - PREPARE_DOCUMENTS
-            - DOCUMENT_CREATED
-            - CLIENT_DENIED
-            - DOCUMENT_SIGNED
-            - CREDIT_ISSUED
-          example: APPROVED
-          description: Статус заявления.
+          $ref: '#/components/schemas/StatementStatus'
         time:
           type: string
           format: localdatetime
@@ -513,7 +498,33 @@ components:
             - AUTOMATIC
             - MANUAL
 
+    MaritalStatus:
+      title: семейное положение
+      type: string
+      enum:
+        - MARRIED
+        - DIVORCED
+        - SINGLE
+        - WIDOW_WIDOWER
+      example: SINGLE
+      description: Семейное положение клиента.
 
+
+    StatementStatus:
+      title: статус заявления
+      type: string
+      enum:
+        - PREAPPROVAL
+        - APPROVED
+        - CC_DENIED
+        - CC_APPROVED
+        - PREPARE_DOCUMENTS
+        - DOCUMENT_CREATED
+        - CLIENT_DENIED
+        - DOCUMENT_SIGNED
+        - CREDIT_ISSUED
+      example: APPROVED
+      description: Статус заявления
 
 
 

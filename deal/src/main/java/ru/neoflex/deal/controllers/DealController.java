@@ -32,7 +32,7 @@ public class DealController implements DealControllerApi {
 
     @Override
     public void select(LoanOfferDTO loanOfferDTO) {
-        selectService.applyOffer(loanOfferDTO);
+        selectService.updateStatement(loanOfferDTO);
     }
 
     @Override
