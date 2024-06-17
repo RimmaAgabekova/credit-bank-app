@@ -32,12 +32,10 @@ public class StatementService {
     private final ClientMapper clientMapper;
 
     public List<LoanOfferDTO> createStatement(LoanStatementRequestDTO request) {
-
         Client client = clientMapper.loanRequestToClient(request);
         log.info("Создали клиента - {}",  client.getClientId());
 
         Statement createStatement = buildStatement(client);
-
         updateStatementStatus(createStatement, StatementStatus.PREAPPROVAL);
         Statement savedStatement = save(createStatement);
 
@@ -68,7 +66,6 @@ public class StatementService {
     }
 
     public void updateStatement(LoanOfferDTO loanOffer) {
-
         Statement statement = getStatementById(loanOffer.getStatementId());
         updateStatementStatus(statement, StatementStatus.APPROVED);
 
