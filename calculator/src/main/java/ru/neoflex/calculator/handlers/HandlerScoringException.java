@@ -22,7 +22,7 @@ public class HandlerScoringException {
         final List<AppError> message = List.of(
                 new AppError("Error", ex.getMessage()));
 
-        log.error(ex.getMessage(), ex);
+        log.error(ex.getMessage());
         return new ApiErrorResponse(message);
     }
 

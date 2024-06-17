@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Statement {
