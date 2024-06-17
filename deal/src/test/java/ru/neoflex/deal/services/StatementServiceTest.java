@@ -3,16 +3,13 @@ package ru.neoflex.deal.services;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.neoflex.deal.mappers.ClientMapper;
-import ru.neoflex.deal.mappers.ClientMapperImpl;
-import ru.neoflex.deal.model.dto.*;
+import ru.neoflex.deal.model.dto.LoanStatementRequestDTO;
+import ru.neoflex.deal.model.dto.StatementStatus;
+import ru.neoflex.deal.model.dto.StatementStatusHistoryDTO;
 import ru.neoflex.deal.models.Client;
 import ru.neoflex.deal.models.Passport;
 import ru.neoflex.deal.models.Statement;
-import ru.neoflex.deal.repositories.ClientRepository;
-import ru.neoflex.deal.repositories.StatementRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,23 +17,9 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class StatementServiceTest {
-
-//    ClientMapper clientMapper;
-    @Mock
-    private ClientRepository clientRepository;
-
-    private final ClientMapper clientMapper = new ClientMapperImpl();
-
-    @Mock
-    private StatementRepository statementRepository;
-
-//    private ScoringDataDTOMapper scoringDataDTOMapper;
-//
-//    private CreditMapper creditMapper;
 
     @InjectMocks
     private StatementService statementService;

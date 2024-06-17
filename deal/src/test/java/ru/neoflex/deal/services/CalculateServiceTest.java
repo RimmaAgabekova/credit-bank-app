@@ -1,6 +1,5 @@
 package ru.neoflex.deal.services;
 
-import lombok.experimental.SuperBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +32,6 @@ class CalculateServiceTest {
     private CalculateService calculateService;
     @Mock
     private SelectService selectService;
-
     @Mock
     private StatementService statementService;
     @Mock
@@ -52,7 +50,6 @@ class CalculateServiceTest {
 
         assertThrows(NullPointerException.class, () -> calculateService.calculateCredit(UUID.randomUUID(), finishRegistrationRequestDto));
     }
-
 
     @Test
     void calculateCreditAndFinishRegistrationShouldReturnFilledOptional() {
@@ -74,7 +71,6 @@ class CalculateServiceTest {
         verify(clientRepository, times(1)).findById(any());
         verify(calculatorFeignClient, times(1)).calc(any());
         verify(statementService, times(1)).updateStatementStatus(any(), any());
-
 
     }
 

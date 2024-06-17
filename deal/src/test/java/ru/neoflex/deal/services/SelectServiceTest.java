@@ -8,8 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.neoflex.deal.model.dto.LoanOfferDTO;
-import ru.neoflex.deal.model.dto.StatementStatus;
-import ru.neoflex.deal.model.dto.StatementStatusHistoryDTO;
 import ru.neoflex.deal.models.Client;
 import ru.neoflex.deal.models.Passport;
 import ru.neoflex.deal.models.Statement;
@@ -17,13 +15,11 @@ import ru.neoflex.deal.repositories.StatementRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -43,14 +39,12 @@ class SelectServiceTest {
         assertThrows(EntityNotFoundException.class, () -> selectService.getStatementById(UUID.randomUUID()));
     }
 
-
     @Test
     void getStatementByIdShouldReturnNotNull() {
 
         when(statementRepository.findById(any())).thenReturn(Optional.of(new Statement()));
         assertNotNull(selectService.getStatementById(UUID.randomUUID()));
         verify(statementRepository, times(1)).findById(any());
-
     }
 
     @Test
@@ -92,7 +86,6 @@ class SelectServiceTest {
                 .isSalaryClient(false)
                 .build();
     }
-
 
 }
 
