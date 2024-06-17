@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neoflex.deal.feign.CalculatorFeignClient;
-import ru.neoflex.deal.model.dto.LoanOfferDTO;
-import ru.neoflex.deal.model.dto.LoanStatementRequestDTO;
-import ru.neoflex.deal.model.dto.StatementStatus;
-import ru.neoflex.deal.model.dto.StatementStatusHistoryDTO;
+import ru.neoflex.deal.mappers.ClientMapper;
+import ru.neoflex.deal.mappers.ClientMapperImpl;
+import ru.neoflex.deal.model.dto.*;
 import ru.neoflex.deal.models.Client;
-import ru.neoflex.deal.models.Passport;
 import ru.neoflex.deal.models.Statement;
 import ru.neoflex.deal.repositories.ClientRepository;
 import ru.neoflex.deal.repositories.StatementRepository;
@@ -23,26 +21,28 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class StatementService {
 
     private final ClientRepository clientRepository;
     private final StatementRepository statementRepository;
     private final CalculatorFeignClient calculatorFeignClient;
+    private final ClientMapper clientMapper = new ClientMapperImpl();
 
-
-    @Transactional
     public List<LoanOfferDTO> createStatement(LoanStatementRequestDTO request) {
-        Client savedClient = createAndSaveClient(request);
 
+        Client savedClient = clientRepository.save(clientMapper.loanRequestToClient(request));
         log.info("Создали и сохранили клиента - " + savedClient.getClientId());
 
         Statement savedStatement = createAndSaveStatement(savedClient);
+        log.info("Создали заявку - " + savedStatement.getStatementId());
+
+        updateStatementStatus(savedStatement, StatementStatus.PREAPPROVAL);
+        statementRepository.save(savedStatement);
 
         log.info("Создали заявку - " + savedStatement.getStatementId());
 
         List<LoanOfferDTO> loanOffers = calculatorFeignClient.offers(request);
-
-        updateStatementStatus(savedStatement, StatementStatus.PREAPPROVAL);
 
         if (loanOffers != null) {
             loanOffers.forEach(offer -> offer.setStatementId(savedStatement.getStatementId()));
@@ -51,7 +51,6 @@ public class StatementService {
         return loanOffers;
     }
 
-    @Transactional
     public Statement createAndSaveStatement(Client client) {
 
         Statement statement = Statement.builder()
@@ -60,35 +59,16 @@ public class StatementService {
                 .statusHistory(new ArrayList<>())
                 .build();
 
-        return statementRepository.save(statement);
+        return statement;
     }
 
-    @Transactional
-    public Client createAndSaveClient(LoanStatementRequestDTO request) {
-
-        Client client = Client.builder()
-                .lastName(request.getLastName())
-                .firstName(request.getFirstName())
-                .middleName(request.getMiddleName())
-                .birthDate(request.getBirthdate())
-                .email(request.getEmail())
-                .passportId(Passport.builder()
-                        .series(request.getPassportSeries())
-                        .number(request.getPassportNumber())
-                        .build())
-                .build();
-
-        return clientRepository.save(client);
-    }
-
-    public void updateStatementStatus(Statement statement, StatementStatus status) {
+    public Statement updateStatementStatus(Statement statement, StatementStatus status) {
         statement.setStatus(status);
         statement.getStatusHistory().add(StatementStatusHistoryDTO.builder()
                 .status(status)
                 .time(LocalDateTime.now())
                 .changeType(StatementStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC)
                 .build());
-
+        return statement;
     }
-
 }

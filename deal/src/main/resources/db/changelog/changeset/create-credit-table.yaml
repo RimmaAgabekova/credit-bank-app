@@ -37,11 +37,11 @@ databaseChangeLog:
                   type: jsonb
 
               - column:
-                  name: is_insurance_enabled
+                  name: insurance_enabled
                   type: boolean
 
               - column:
-                  name: is_salary_client
+                  name: salary_client
                   type: boolean
 
               - column:

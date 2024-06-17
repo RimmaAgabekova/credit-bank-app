@@ -15,9 +15,8 @@ import java.util.UUID;
 @Data
 @Entity
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@SequenceGenerator(name = "statementSeqGenerator", sequenceName = "statement_id_seq", allocationSize = 1)
+@RequiredArgsConstructor
 public class Statement {
 
     @Id
@@ -32,25 +31,25 @@ public class Statement {
     @JoinColumn(name = "credit_id")
     private Credit creditId;
 
-    @Column
+    @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private StatementStatus status;
 
-    @Column
+    @Column(name = "creation_date")
     private LocalDate creationDate;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(name = "applied_offer", columnDefinition = "jsonb")
     private LoanOfferDTO appliedOffer;
 
-    @Column
+    @Column(name = "sign_date")
     private LocalDate signDate;
 
-    @Column
+    @Column(name = "ses_code")
     private Integer sesCode;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
+    @Column(name = "status_history", columnDefinition = "jsonb")
     private List<StatementStatusHistoryDTO> statusHistory;
 
 }

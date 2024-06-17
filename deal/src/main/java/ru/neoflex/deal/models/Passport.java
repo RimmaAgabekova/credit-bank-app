@@ -11,17 +11,22 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SequenceGenerator(name = "passportSeqGenerator", sequenceName = "passport_id_seq", allocationSize = 1)
 public class Passport {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "passport")
     private UUID passport;
-    @Column
+
+    @Column(name = "series")
     private String series;
-    @Column
+
+    @Column(name = "number")
     private String number;
-    @Column
+
+    @Column(name = "issue_branch")
     private String issueBranch;
-    @Column
+
+    @Column(name = "issue_date")
     private LocalDate issueDate;
+
 }

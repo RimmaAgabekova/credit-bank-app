@@ -2,10 +2,7 @@ package ru.neoflex.deal.models;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -15,47 +12,47 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SequenceGenerator(name = "clientSeqGenerator", sequenceName = "client_id_seq", allocationSize = 1)
 public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "client_id")
     private UUID clientId;
 
-    @Column
+    @Column(name = "last_name")
     private String lastName;
 
-    @Column
+    @Column(name = "first_name")
     private String firstName;
 
-    @Column
+    @Column(name = "middle_name")
     private String middleName;
 
-    @Column
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column
+    @Column(name = "email")
     private String email;
 
-    @Column
+    @Column(name = "gender")
     private String gender;
 
-    @Column
+    @Column(name = "marital_status")
     private String maritalStatus;
 
-    @Column
+    @Column(name = "dependent_amount")
     private Integer dependentAmount;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "passport_id", referencedColumnName = "passport")
     @Nullable
     private Passport passportId;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "employment_id", referencedColumnName = "employment")
     @Nullable
     private Employment employmentId;
 
-    @Column
+    @Column(name = "account_number")
     private String accountNumber;
 }

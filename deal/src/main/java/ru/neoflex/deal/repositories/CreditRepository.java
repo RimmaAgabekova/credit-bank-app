@@ -6,6 +6,6 @@ import ru.neoflex.deal.models.Credit;
 
 import java.util.UUID;
 
-@Repository
+
 public interface CreditRepository extends JpaRepository<Credit, Long> {
 }

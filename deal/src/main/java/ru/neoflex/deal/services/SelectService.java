@@ -25,22 +25,19 @@ public class SelectService {
     public void updateStatement(LoanOfferDTO loanOffer) {
 
         Statement statement = getStatementById(loanOffer.getStatementId());
-
         statementService.updateStatementStatus(statement, StatementStatus.APPROVED);
 
-        log.info("Обновили статус statement - " + statement.getStatementId());
+        log.info("В заявке обновляется статус на APPROVED " + statement.getStatementId());
 
         statement.setAppliedOffer(loanOffer);
         log.info(" принятое предложение установили в поле appliedOffer - " + loanOffer);
 
-        log.info("Заявка сохраняется");
-
+        log.info("Заявка сохранилась в БД");
         statementRepository.save(statement);
 
     }
 
     public Statement getStatementById(UUID statementId) {
-
         return statementRepository.findById(statementId)
                 .orElseThrow(() -> new EntityNotFoundException("Заявление с идентификатором не найдено - " + statementId));
     }

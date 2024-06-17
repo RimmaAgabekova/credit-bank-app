@@ -1,4 +1,4 @@
-package ru.neoflex.deal.models;
+package ru.neoflex.deal.enums;
 
 public enum CreditStatus {
     CALCULATED,

@@ -5,7 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.neoflex.deal.model.dto.LoanStatementRequestDTO;
+import ru.neoflex.deal.mappers.ClientMapper;
+import ru.neoflex.deal.mappers.ClientMapperImpl;
+import ru.neoflex.deal.model.dto.*;
 import ru.neoflex.deal.models.Client;
 import ru.neoflex.deal.models.Passport;
 import ru.neoflex.deal.models.Statement;
@@ -13,35 +15,41 @@ import ru.neoflex.deal.repositories.ClientRepository;
 import ru.neoflex.deal.repositories.StatementRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StatementServiceTest {
+
+//    ClientMapper clientMapper;
     @Mock
     private ClientRepository clientRepository;
 
+    private final ClientMapper clientMapper = new ClientMapperImpl();
+
     @Mock
     private StatementRepository statementRepository;
+
+//    private ScoringDataDTOMapper scoringDataDTOMapper;
+//
+//    private CreditMapper creditMapper;
 
     @InjectMocks
     private StatementService statementService;
 
 
     @Test
-    void createAndSaveStatement() {
+    void createAndSaveStatementShouldReturnFilledData() {
         Client client = new Client();
         Statement mockStatement = Statement.builder()
                 .clientId(client)
                 .creationDate(LocalDate.now())
                 .statusHistory(new ArrayList<>())
                 .build();
-
-        when(statementRepository.save(any())).thenReturn(mockStatement);
 
         Statement savedStatement = statementService.createAndSaveStatement(client);
 
@@ -52,14 +60,12 @@ class StatementServiceTest {
     }
 
     @Test
-    void createAndSaveClient() {
+    void createAndSaveClientShouldReturnFilledData() {
 
         LoanStatementRequestDTO request = createLoanStatementRequestDto();
         Client mockClient = createClient(request);
 
-        when(clientRepository.save(any())).thenReturn(mockClient);
-
-        Client savedClient = statementService.createAndSaveClient(request);
+        Client savedClient = createClient(request);
 
         assertNotNull(savedClient);
 
@@ -72,6 +78,24 @@ class StatementServiceTest {
         assertEquals(mockClient.getPassportId().getNumber(), savedClient.getPassportId().getNumber());
     }
 
+
+    @Test
+    void updateStatementWithSelectedOffer() {
+
+        Client savedClient = new Client();
+
+        Statement savedStatement = statementService.createAndSaveStatement(savedClient);
+
+        Statement updatedStatement = statementService.updateStatementStatus(savedStatement, StatementStatus.PREAPPROVAL);
+
+
+        assertNotNull(updatedStatement);
+        assertEquals(StatementStatus.PREAPPROVAL, updatedStatement.getStatus());
+        assertEquals(StatementStatus.PREAPPROVAL, updatedStatement.getStatusHistory().get(0).getStatus());
+        assertEquals(LocalDateTime.now().toLocalDate(), updatedStatement.getStatusHistory().get(0).getTime().toLocalDate());
+        assertEquals(StatementStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC, updatedStatement.getStatusHistory().get(0).getChangeType());
+
+    }
 
 
     private LoanStatementRequestDTO createLoanStatementRequestDto() {

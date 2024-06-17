@@ -30,13 +30,13 @@ databaseChangeLog:
                   type: varchar
               - column:
                   name: creation_date
-                  type: timestamp
+                  type: date
               - column:
                   name: applied_offer
                   type: jsonb
               - column:
                   name: sign_date
-                  type: timestamp
+                  type: date
               - column:
                   name: ses_code
                   type: int

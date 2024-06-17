@@ -1,10 +1,7 @@
 package ru.neoflex.deal.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.neoflex.deal.model.dto.EmploymentDTO;
 
 import java.math.BigDecimal;
@@ -12,34 +9,31 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@SequenceGenerator(name = "employmentSeqGenerator", sequenceName = "employment_id_seq", allocationSize = 1)
 public class Employment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "employment")
     private UUID employment;
 
-    @Column
+    @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private EmploymentDTO.EmploymentStatusEnum status;
 
-    @Column
+    @Column(name = "employer_inn")
     private String employerInn;
 
-    @Column
+    @Column(name = "salary")
     private BigDecimal salary;
 
-    @Column
+    @Column(name = "position")
     @Enumerated(EnumType.STRING)
     private EmploymentDTO.PositionEnum position;
 
-    @Column
+    @Column(name = "work_experience_total")
     private Integer workExperienceTotal;
 
-    @Column
+    @Column(name = "work_experience_current")
     private Integer workExperienceCurrent;
 
 

@@ -14,7 +14,7 @@ public class HandlerException {
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<String> FeignException(FeignException exception) {
 
-        log.error(exception.getMessage(), exception);
+        log.error(exception.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(exception.contentUTF8());

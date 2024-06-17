@@ -16,14 +16,16 @@
         <springdoc-openapi-starter-webmvc-ui.version>2.5.0</springdoc-openapi-starter-webmvc-ui.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <openapi-generator-maven-plugin.version>7.1.0</openapi-generator-maven-plugin.version>
-        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <spring-boot-starter-web.version>3.2.5</spring-boot-starter-web.version>
+        <jackson-databind-nullable.version>0.2.6</jackson-databind-nullable.version>
+        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+
     </properties>
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>3.3.0</version>
+            <version>${spring-boot-starter-web.version}</version>
         </dependency>
 
         <dependency>
@@ -48,7 +50,7 @@
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
-            <version>0.2.6</version>
+            <version>${jackson-databind-nullable.version}</version>
         </dependency>
 
         <dependency>
@@ -65,11 +67,6 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-63</artifactId>
-            <version>3.7.6</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
@@ -77,6 +74,17 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <version>6.1.6.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${org.mapstruct.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${org.mapstruct.version}</version>
         </dependency>
 
     </dependencies>
@@ -98,10 +106,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -150,7 +155,7 @@
                                 <typeMapping>localdatetime=java.time.LocalDateTime</typeMapping>
                                 <typeMapping>timestamp=java.sql.Timestamp</typeMapping>
                             </typeMappings>
-                            <inputSpec>${project.basedir}/src/main/resources/openapi.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapiDeal.yaml</inputSpec>
                             <configOptions>
                                 <useResponseEntity>false</useResponseEntity>
                                 <useSpringBoot3>true</useSpringBoot3>
@@ -175,6 +180,28 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.32</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${org.mapstruct.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>

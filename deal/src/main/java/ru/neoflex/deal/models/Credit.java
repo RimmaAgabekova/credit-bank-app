@@ -1,10 +1,7 @@
 package ru.neoflex.deal.models;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import ru.neoflex.deal.model.dto.PaymentScheduleElementDTO;
@@ -18,38 +15,38 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@SequenceGenerator(name = "creditSeqGenerator", sequenceName = "credit_id_seq", allocationSize = 1)
 public class Credit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "credit_id")
     private UUID creditId;
 
-    @Column
+    @Column(name = "amount")
     private BigDecimal amount;
 
-    @Column
+    @Column(name = "term")
     private Integer term;
 
-    @Column
+    @Column(name = "monthly_payment")
     private BigDecimal monthlyPayment;
 
-    @Column
+    @Column(name = "rate")
     private BigDecimal rate;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private List<PaymentScheduleElementDTO> paymentSchedule;
-
-    @Column
+    @Column(name = "psk")
     private BigDecimal psk;
 
-    @Column
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "payment_schedule", columnDefinition = "jsonb")
+    private List<PaymentScheduleElementDTO> paymentSchedule;
+
+    @Column(name = "insurance_enabled")
     private Boolean isInsuranceEnabled;
 
-    @Column
+    @Column(name = "salary_client")
     private Boolean isSalaryClient;
 
-    @Column
+    @Column(name = "credit_status")
     private String creditStatus;
 }

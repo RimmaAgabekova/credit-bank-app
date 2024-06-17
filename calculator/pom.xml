@@ -110,7 +110,7 @@
                                 <typeMapping>double=java.math.BigDecimal</typeMapping>
                                 <typeMapping>localdatetime=java.time.LocalDateTime</typeMapping>
                             </typeMappings>
-                            <inputSpec>${project.basedir}/src/main/resources/openapi.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapiCalculator.yaml</inputSpec>
                             <configOptions>
                                 <useResponseEntity>false</useResponseEntity>
                                 <useSpringBoot3>true</useSpringBoot3>
