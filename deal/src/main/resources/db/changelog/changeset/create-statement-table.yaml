@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-statement
+      author: Agabekova
+      changes:
+        - createTable:
+            tableName: statement
+            columns:
+              - column:
+                  name: statement_id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: client_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: fk_client_id
+                    referencedTableName: client
+                    referencedColumnNames: client_id
+              - column:
+                  name: credit_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: fk_credit_id
+                    referencedTableName: credit
+                    referencedColumnNames: credit_id
+              - column:
+                  name: status
+                  type: varchar
+              - column:
+                  name: creation_date
+                  type: date
+              - column:
+                  name: applied_offer
+                  type: jsonb
+              - column:
+                  name: sign_date
+                  type: date
+              - column:
+                  name: ses_code
+                  type: int
+              - column:
+                  name: status_history
+                  type: jsonb

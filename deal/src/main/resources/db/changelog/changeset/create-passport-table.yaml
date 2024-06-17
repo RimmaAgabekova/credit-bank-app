@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-passport
+      author: Agabekova
+      changes:
+        - createTable:
+            tableName: passport
+            columns:
+              - column:
+                  name: passport
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+
+              - column:
+                  name: series
+                  type: varchar
+
+              - column:
+                  name: number
+                  type: varchar
+
+              - column:
+                  name: issue_branch
+                  type: varchar
+              - column:
+                  name: issue_date
+                  type: date
