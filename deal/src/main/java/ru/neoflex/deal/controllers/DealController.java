@@ -16,7 +16,6 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/deal")
 @RequiredArgsConstructor
 public class DealController implements DealControllerApi {
 
