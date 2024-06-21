@@ -1,0 +1,398 @@
+openapi: 3.0.3
+info:
+  title: openapi-generation
+  version: 1.0.1
+
+servers:
+  - url: http://localhost:8082/
+
+paths:
+  /api/v1/statement:
+    post:
+      tags:
+        - StatementController
+      summary: Прескоринг + запрос на расчёт возможных условий кредита.
+      operationId: statement
+      requestBody:
+        $ref: '#/components/requestBodies/statementRequest'
+      responses:
+        200:
+          description: успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/LoanOfferDTO'
+        400:
+          description: некорректные данные
+
+  /api/v1/statement/offer:
+    post:
+      tags:
+        - StatementController
+      summary: валидация присланных данных + скоринг данных + полный расчет параметров кредита
+      operationId: offer
+      requestBody:
+        $ref: '#/components/requestBodies/offerRequest'
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
+
+components:
+  requestBodies:
+    statementRequest:
+      description: Прескоринг + запрос на расчёт возможных условий кредита.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoanStatementRequestDTO'
+
+    offerRequest:
+      description: Выбор одного из предложений.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoanOfferDTO'
+
+  schemas:
+    LoanStatementRequestDTO:
+      title: Запрос заявки на получение кредита
+      type: object
+      description: Краткая информация о заявке.
+      required:
+        - amount
+        - term
+        - firstName
+        - lastName
+        - middleName
+        - email
+        - birthDate
+        - passportSeries
+        - passportNumber
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 1000000
+          minimum: 30000
+          description: Запрашиваемая сумма кредита.
+        term:
+          type: integer
+          example: 24
+          minimum: 6
+          description: Запрашиваемый срок кредитования (месяцы).
+        firstName:
+          type: string
+          example: Ivan
+          pattern: '[A-Za-z\-]{2,30}'
+          description: Имя клиента
+        lastName:
+          type: string
+          example: Ivanov
+          pattern: '[A-Za-z\-]{2,30}'
+          description: Фамилия клиента
+        middleName:
+          type: string
+          example: Ivanovich
+          pattern: '[A-Za-z]{2,30}'
+          description: Отчество клиента
+        email:
+          type: string
+          example: iivanov@email.ru
+          pattern: '^[a-zA-Z0-9_!#$%&*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$'
+          description: Электронная почта клиента.
+        birthdate:
+          type: string
+          format: date
+          example: 1997-02-18
+          description: дата рождения клиента
+        passportSeries:
+          type: string
+          example: 1234
+          pattern: '[0-9]{4}'
+          description: Серия паспорта клиента
+        passportNumber:
+          type: string
+          example: 123456
+          pattern: '[0-9]{6}'
+          description: Номер паспорта клиента
+
+    LoanOfferDTO:
+      title: Кредитное предложение
+      type: object
+      description: Кредитное предложение после скоринга.
+      required:
+        - statementId
+        - requestedAmount
+        - totalAmount
+        - term
+        - monthlyPayment
+        - rate
+        - isInsuranceEnabled
+        - isSalaryClient
+      properties:
+        statementId:
+          type: string
+          format: uuid
+          example: 3422b448-2460-4fd2-9183-8000de6f8343
+          pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          description: идентификатор заявления.
+        requestedAmount:
+          type: number
+          format: double
+          example: 1000000.00
+          minimum: 30000.00
+          description: Запрашиваемая сумма кредита.
+        totalAmount:
+          type: number
+          format: double
+          example: 1000000.00
+          minimum: 30000.00
+          description: Общая сумма кредита (с учетом услуг, страховки и т.д.).
+        term:
+          type: integer
+          example: 24
+          minimum: 6
+          description: Запрашиваемый срок кредитования (месяцы).
+        monthlyPayment:
+          type: number
+          format: double
+          example: 10000.10
+          description: Ежемесячный платеж.
+        rate:
+          type: number
+          format: double
+          example: 12.50
+          description: Ставка по кредиту
+        isInsuranceEnabled:
+          type: boolean
+          example: true
+          description: Включена ли страховка?
+        isSalaryClient:
+          type: boolean
+          example: true
+          description: Является ли зарплатный клиент?
+
+    ScoringDataDTO:
+      title: Оценочные данные
+      type: object
+      description: Полные оценочные данные.
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 1000000
+          minimum: 30000
+          description: Запрашиваемая сумма кредита.
+        term:
+          type: integer
+          example: 24
+          minimum: 6
+          description: Запрашиваемый срок кредитования (месяцы).
+        firstName:
+          type: string
+          example: Ivan
+          pattern: '[A-Za-z\-]{2,30}'
+          description: Имя клиента
+        lastName:
+          type: string
+          example: Ivanov
+          pattern: '[A-Za-z\-]{2,30}'
+          description: Фамилия клиента
+        middleName:
+          type: string
+          example: Ivanovich
+          pattern: '[A-Za-z]{2,30}'
+          description: Отчество клиента(при наличии).
+        gender:
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - NON_BINARY
+          example: MALE
+          description: Пол клиента.
+        birthdate:
+          type: string
+          format: date
+          example: 1996-11-27
+          description: Дата рождения клиента
+        passportSeries:
+          type: string
+          example: 1234
+          pattern: '[0-9]{4}'
+          description: Серия паспорта клиента
+        passportNumber:
+          type: string
+          example: 123456
+          pattern: '[0-9]{6}'
+          description: серия паспорта клиента
+        passportIssueDate:
+          type: string
+          format: date
+          example: 2020-02-27
+          description: Дата выдачи паспорта клиента.
+        passportIssueBranch:
+          type: string
+          example: 123-456
+          description: Отдел выдачи паспорта клиента.
+        maritalStatus:
+          type: string
+          enum:
+            - MARRIED
+            - DIVORCED
+            - SINGLE
+            - WIDOW_WIDOWER
+          example: SINGLE
+          description: Семейное положение клиента.
+        dependentAmount:
+          type: integer
+          example: 1
+          description: количество иждевенцев
+        employment:
+          $ref: '#/components/schemas/EmploymentDTO'
+        accountNumber:
+          type: string
+          pattern: '[0-9]{20}'
+          example: 11223344556677889900
+          description: Основной счет клиента.
+        isInsuranceEnabled:
+          type: boolean
+          example: true
+          description: Включена ли страховка?
+        isSalaryClient:
+          type: boolean
+          example: true
+          description: Является зарплатным клиентом?
+
+    CreditDTO:
+      title: Credit
+      type: object
+      description: Информация о кредите
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 1000000.00
+          description: Запрашиваемая сумма кредита.
+        term:
+          type: integer
+          example: 24
+          description: Запрашиваемый срок кредитования (месяцы).
+        monthlyPayment:
+          type: number
+          format: double
+          example: 10000.10
+          description: Ежемесячный платеж.
+        rate:
+          type: number
+          format: double
+          example: 12.50
+          description: Ставка по кредиту
+        psk:
+          type: number
+          format: double
+          example: 12.50
+          description: Полная стоимость кредита
+        isInsuranceEnabled:
+          type: boolean
+          example: true
+          description: Включена ли страховка?
+        isSalaryClient:
+          type: boolean
+          example: true
+          description: Является зарплатным клиентом
+        paymentSchedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentScheduleElementDTO'
+          description: График платежей
+
+    EmploymentDTO:
+      title: Employment
+      type: object
+      description: Информация о трудоустройстве клиента.
+      required:
+        - employmentStatus
+        - employerINN
+        - salary
+        - position
+        - workExperienceTotal
+        - workExperienceCurrent
+      properties:
+        employmentStatus:
+          type: string
+          enum:
+            - UNEMPLOYED
+            - SELF_EMPLOYED
+            - EMPLOYED
+            - BUSINESS_OWNER
+          example: EMPLOYED
+          description: Статус занятости клиента.
+        employerINN:
+          type: string
+          example: 123456789012
+          pattern: '[0-9]{12}'
+          description: ИНН работодателя клиента.
+        salary:
+          type: number
+          format: double
+          example: 100000.00
+          description: Зарплата клиента.
+        position:
+          type: string
+          enum:
+            - WORKER
+            - MID_MANAGER
+            - TOP_MANAGER
+            - OWNER
+          example: WORKER
+          description: Должность клиента по найму.
+        workExperienceTotal:
+          type: integer
+          example: 5
+          description: Общий стаж работы клиента.
+        workExperienceCurrent:
+          type: integer
+          example: 2
+          description: Опыт работы клиента на текущей работе.
+
+    PaymentScheduleElementDTO:
+      title: Payment schedule element
+      type: object
+      description: Элемент графика платежей.
+      properties:
+        number:
+          type: integer
+          example: 1
+          description: Порядковый номер платежа.
+        date:
+          type: string
+          format: date
+          example: 2022-06-01
+          description: Дата платежа.
+        totalPayment:
+          type: number
+          format: double
+          example: 12000.00
+          description: Общая сумма платежа.
+        interestPayment:
+          type: number
+          format: double
+          example: 12000.00
+          description: Сумма выплаты процентов.
+        debtPayment:
+          type: number
+          format: double
+          example: 5000.00
+          description: Сумма выплаты по основному долгу.
+        remainingDebt:
+          type: number
+          format: double
+          example: 95000.00
+          description: Оставшаяся сумма долга.

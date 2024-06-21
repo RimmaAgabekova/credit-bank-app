@@ -3,7 +3,6 @@ package ru.neoflex.deal.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.neoflex.deal.model.dto.FinishRegistrationRequestDto;
 import ru.neoflex.deal.model.dto.LoanOfferDTO;
@@ -16,7 +15,6 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/deal")
 @RequiredArgsConstructor
 public class DealController implements DealControllerApi {
 
@@ -37,6 +35,5 @@ public class DealController implements DealControllerApi {
     public void calculate(String statementId, FinishRegistrationRequestDto finishRegistrationRequestDto) {
         calculateService.calculateCredit(UUID.fromString(statementId), finishRegistrationRequestDto);
     }
-
 
 }
