@@ -24,10 +24,8 @@ import static org.mockito.Mockito.when;
 class StatementServiceTest {
     @InjectMocks
     StatementService statementService;
-
     @Mock
     StatementFeignClient statementFeignClient;
-
 
     @Test
     void calculationOfLoanTerms() {
@@ -40,12 +38,7 @@ class StatementServiceTest {
 
     @Test
     void selectAnOffers() {
-        statementService.selectAnOffers(createLoanOffers());
-        Mockito.verify(statementFeignClient, times(1)).select(any());
-    }
-
-    public LoanOfferDTO createLoanOffers() {
-        return LoanOfferDTO.builder()
+        LoanOfferDTO loanOffer = LoanOfferDTO.builder()
                 .statementId(UUID.randomUUID())
                 .requestedAmount(BigDecimal.valueOf(100000))
                 .totalAmount(BigDecimal.valueOf(107016.44))
@@ -55,5 +48,8 @@ class StatementServiceTest {
                 .isInsuranceEnabled(true)
                 .isSalaryClient(true)
                 .build();
+
+        statementService.selectAnOffers(loanOffer);
+        Mockito.verify(statementFeignClient, times(1)).select(any());
     }
 }

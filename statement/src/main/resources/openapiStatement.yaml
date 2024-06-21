@@ -43,7 +43,6 @@ paths:
 
 components:
   requestBodies:
-
     statementRequest:
       description: Прескоринг + запрос на расчёт возможных условий кредита.
       required: true
@@ -61,7 +60,6 @@ components:
             $ref: '#/components/schemas/LoanOfferDTO'
 
   schemas:
-
     LoanStatementRequestDTO:
       title: Запрос заявки на получение кредита
       type: object
