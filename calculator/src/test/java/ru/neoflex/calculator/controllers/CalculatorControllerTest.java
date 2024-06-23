@@ -1,7 +1,6 @@
 package ru.neoflex.calculator.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,7 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(CalculatorController.class)
-@RequiredArgsConstructor
 class CalculatorControllerTest {
 
     @Autowired
