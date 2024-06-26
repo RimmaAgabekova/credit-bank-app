@@ -1,14 +1,18 @@
 package ru.neoflex.calculator.handlers;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@RequiredArgsConstructor
 @Getter
+@Setter
+@EqualsAndHashCode
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ApiErrorResponse {
 
-    private final List<AppError> apiErrorsResponse;
+    private List<AppError> apiErrorsResponse;
 
 }
