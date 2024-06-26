@@ -1,9 +1,14 @@
 package ru.neoflex.calculator.handlers;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
+
 
 @Getter
+@Setter
+@EqualsAndHashCode
+@ToString
+@Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class AppError {
     private String name;
