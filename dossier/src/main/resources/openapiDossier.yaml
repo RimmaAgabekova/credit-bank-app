@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info:
+  title: openapi-generation
+  version: 1.0.1
+
+servers:
+  - url: http://localhost:8083/
+
+paths: {}
+
+
+components:
+  schemas:
+
+    EmailMessage:
+      title:  Сообщение электронной почты
+      type: object
+      description: Электронная почта для отправки данных в микросервис Досье
+      properties:
+        address:
+          type: string
+          example: agabekova@gmail.com
+          description: Адрес электронной почты клиента
+        theme:
+          type: string
+          enum:
+            - FINISH_REGISTRATION
+            - CREATE_DOCUMENTS
+            - SEND_DOCUMENTS
+            - SEND_SES
+            - CREDIT_ISSUED
+            - STATEMENT_DENIED
+          example: FINISH_REGISTRATION
+          description: Тема письма
+        statementId:
+          type: string
+          format: uuid
+          example: 3422b448-2460-4fd2-9183-8000de6f8343
+          pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          description: идентификатор заявления.
+        sesCode:
+          type: integer
+          example: 1234
+          description: код подписания
+
+
+
+
+
+
+
+
+
+
+
+
