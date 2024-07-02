@@ -56,6 +56,7 @@ paths:
       parameters:
         - name: statementId
           in: path
+          description: id заявки
           required: true
           schema:
             type: string
@@ -68,6 +69,95 @@ paths:
           description: некорректные данные
         404:
           description: не найдено
+
+  /api/v1/deal/document/{statementId}/send:
+    post:
+      tags:
+        -  DocumentController
+      summary: запрос на отправку документов
+      operationId: send
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
+
+  /api/v1/deal/document/{statementId}/sign :
+    post:
+      tags:
+        -  DocumentController
+      summary: запрос на подписание документов
+      operationId: sign
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
+
+
+  /api/v1/deal/document/{statementId}/code:
+    post:
+      tags:
+        -  DocumentController
+      summary: подписание документов
+      operationId: code
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+        - name: ses-code
+          in: header
+          description: код подписания
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
+
+  /api/v1/deal/admin/statement/{statementId}/status:
+    put:
+      tags:
+        - StatusController
+      summary: обновление статуса
+      operationId: status
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+        - name: newStatus
+          in: query
+          description: введите новый статус
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
 
 components:
   requestBodies:
@@ -112,6 +202,37 @@ components:
           schema:
             $ref: '#/components/schemas/FinishRegistrationRequestDto'
 
+    sendRequest:
+      description: запрос на отправку документов.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailMessage'
+
+    signRequest:
+      description: запрос на подписание документов.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailMessage'
+
+    codeRequest:
+      description: подписание документов.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailMessage'
+
+    statusRequest:
+      description: обновление статуса.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatementStatus'
 
   schemas:
     LoanStatementRequestDTO:
@@ -444,8 +565,6 @@ components:
           example: 95000.00
           description: Оставшаяся сумма долга.
 
-
-
     FinishRegistrationRequestDto:
       title: завершение регистрации и полный подсчёт кредита
       type: object
@@ -509,7 +628,6 @@ components:
       example: SINGLE
       description: Семейное положение клиента.
 
-
     StatementStatus:
       title: статус заявления
       type: string
@@ -526,11 +644,33 @@ components:
       example: APPROVED
       description: Статус заявления
 
-
-
-
-
-
-
-
-
+    EmailMessage:
+      title:  Сообщение электронной почты
+      type: object
+      description: Элкутронная почта для отправки данных в микросервис Досье
+      properties:
+        address:
+          type: string
+          example: agabekova@gmail.com
+          description: Адрес электронной почты клиента
+        theme:
+          type: string
+          enum:
+            - FINISH_REGISTRATION
+            - CREATE_DOCUMENTS
+            - SEND_DOCUMENTS
+            - SEND_SES
+            - CREDIT_ISSUED
+            - STATEMENT_DENIED
+          example: FINISH_REGISTRATION
+          description: Тема письма
+        statementId:
+          type: string
+          format: uuid
+          example: 3422b448-2460-4fd2-9183-8000de6f8343
+          pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          description: идентификатор заявления.
+        sesCode:
+          type: integer
+          example: 1234
+          description: код подписания

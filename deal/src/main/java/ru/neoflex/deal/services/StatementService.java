@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neoflex.deal.feign.CalculatorFeignClient;
 import ru.neoflex.deal.mappers.ClientMapper;
-import ru.neoflex.deal.model.dto.LoanOfferDTO;
-import ru.neoflex.deal.model.dto.LoanStatementRequestDTO;
-import ru.neoflex.deal.model.dto.StatementStatus;
-import ru.neoflex.deal.model.dto.StatementStatusHistoryDTO;
+import ru.neoflex.deal.model.dto.*;
 import ru.neoflex.deal.models.Client;
 import ru.neoflex.deal.models.Statement;
 import ru.neoflex.deal.repositories.StatementRepository;
@@ -30,10 +27,11 @@ public class StatementService {
     private final StatementRepository statementRepository;
     private final CalculatorFeignClient calculatorFeignClient;
     private final ClientMapper clientMapper;
+    private final KafkaService kafkaService;
 
     public List<LoanOfferDTO> createStatement(LoanStatementRequestDTO request) {
         Client client = clientMapper.loanRequestToClient(request);
-        log.info("Создали клиента - {}",  client.getClientId());
+        log.info("Создали клиента - {}", client.getClientId());
 
         Statement createStatement = buildStatement(client);
         updateStatementStatus(createStatement, StatementStatus.PREAPPROVAL);
@@ -70,6 +68,10 @@ public class StatementService {
         updateStatementStatus(statement, StatementStatus.APPROVED);
 
         statement.setAppliedOffer(loanOffer);
+
+        String clientEmail = statement.getClientId().getEmail();
+        EmailMessage message = createEmailMassage(EmailMessage.ThemeEnum.CREATE_DOCUMENTS, statement.getStatementId(), clientEmail);
+        kafkaService.sendFinishRegistrationRequest(message);
     }
 
     public Statement getStatementById(UUID statementId) {
@@ -80,4 +82,13 @@ public class StatementService {
     public Statement save(Statement statement) {
         return statementRepository.save(statement);
     }
+
+    public EmailMessage createEmailMassage(EmailMessage.ThemeEnum theme, UUID statementId, String address) {
+        return EmailMessage.builder()
+                .theme(theme)
+                .statementId(statementId)
+                .address(address)
+                .build();
+    }
+
 }

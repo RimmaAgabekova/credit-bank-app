@@ -13,6 +13,7 @@
     <modules>
         <module>calculator</module>
         <module>deal</module>
+        <module>dossier</module>
         <module>statement</module>
     </modules>
 
@@ -28,6 +29,7 @@
         <jackson-databind-nullable.version>0.2.6</jackson-databind-nullable.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <lombok.version>1.18.32</lombok.version>
+        <spring-kafka.version>3.2.0</spring-kafka.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -75,6 +77,16 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${org.mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+                <optional>false</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.kafka</groupId>
+                <artifactId>spring-kafka</artifactId>
+                <version>${spring-kafka.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

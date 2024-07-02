@@ -17,8 +17,6 @@
         <openapi-generator-maven-plugin.version>7.1.0</openapi-generator-maven-plugin.version>
         <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <lombok.version>1.18.32</lombok.version>
-        <postgresql.version>42.7.3</postgresql.version>
-        <liquibase-core.version>4.24.0</liquibase-core.version>
     </properties>
     <dependencies>
         <dependency>
@@ -47,7 +45,6 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>

@@ -27,6 +27,7 @@ public class CalculateService {
     private final ClientMapper clientMapper;
     private final CreditMapper creditMapper;
     private final ScoringDataDTOMapper scoringDataDTOMapper;
+    private final DocumentService documentService;
 
     public void calculateCredit(UUID statementId, FinishRegistrationRequestDto finishRegistrationRequest) {
         log.info("Запрос на рассчет кредита для statementId =  {} по параметрам {}", statementId, finishRegistrationRequest);
@@ -38,6 +39,11 @@ public class CalculateService {
 
         CreditDTO creditDTO = calculatorFeignClient.calc(scoringData);
 
+        String clientEmail = statement.getClientId().getEmail();
+
+        EmailMessage massage = documentService.createEmailMassage(EmailMessage.ThemeEnum.STATEMENT_DENIED, statementId, clientEmail);
+        documentService.sendStatementDeniedRequest(massage);
+
         Credit savedCredit = creditMapper.creditDTOToCredit(creditDTO, CreditStatus.CALCULATED);
         statement.setCreditId(savedCredit);
 
@@ -47,6 +53,9 @@ public class CalculateService {
 
         statementService.save(statement);
         log.info("Заявка сохранена в БД {}", statement);
+
+        EmailMessage message = documentService.createEmailMassage(EmailMessage.ThemeEnum.CREATE_DOCUMENTS, statementId, clientEmail);
+        documentService.sendCreateDocumentRequest(message);
     }
 
 }
