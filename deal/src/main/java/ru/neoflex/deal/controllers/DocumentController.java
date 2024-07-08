@@ -26,6 +26,6 @@ public class DocumentController implements DocumentControllerApi {
 
     @Override
     public void code(String statementId, @NotNull String sesCode) {
-        documentService.sendCreditIssueRequest(UUID.fromString(statementId), Integer.valueOf(sesCode.toString()));
+        documentService.sendCreditIssueRequest(UUID.fromString(statementId), Integer.valueOf(sesCode));
     }
 }

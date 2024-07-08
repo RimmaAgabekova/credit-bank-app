@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class HandlerException {
-
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<String> FeignException(FeignException exception) {
         log.error(exception.getMessage());

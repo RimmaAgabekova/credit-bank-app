@@ -46,7 +46,6 @@ paths:
         404:
           description: не найдено
 
-
   /api/v1/deal/calculate/{statementId}:
     post:
       tags:
@@ -108,7 +107,6 @@ paths:
         400:
           description: некорректные данные
 
-
   /api/v1/deal/document/{statementId}/code:
     post:
       tags:
@@ -156,6 +154,29 @@ paths:
       responses:
         200:
           description: успешно
+        400:
+          description: некорректные данные
+
+  /api/v1/deal/admin/statement/{statementId}/statement-data:
+    get:
+      tags:
+        - DealController
+      summary: Получение данных по заявке
+      operationId: statementData
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatementDTO'
         400:
           description: некорректные данные
 
@@ -647,7 +668,7 @@ components:
     EmailMessage:
       title:  Сообщение электронной почты
       type: object
-      description: Элкутронная почта для отправки данных в микросервис Досье
+      description: Электронная почта для отправки данных в микросервис Досье
       properties:
         address:
           type: string
@@ -667,10 +688,104 @@ components:
         statementId:
           type: string
           format: uuid
-          example: 3422b448-2460-4fd2-9183-8000de6f8343
-          pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
           description: идентификатор заявления.
+
+    StatementDTO:
+      title: Statement
+      type: object
+      description: Вся информация по заявке.
+      properties:
+        statementId:
+          type: string
+          format: uuid
+          description: идентификатор заявления.
+        clientId:
+          $ref: '#/components/schemas/ClientDTO'
+        creditId:
+          $ref: '#/components/schemas/CreditDTO'
+        status:
+          $ref: '#/components/schemas/StatementStatus'
+        creationDate:
+          type: string
+          format: date
+          example: 22-05-04
+          description: Дата создания заявки
+        signDate:
+          type: string
+          format: date
+          example: 2022-05-01
+          description: Дата подписания заявки
         sesCode:
-          type: integer
+          type: string
           example: 1234
-          description: код подписания
+          description: Код подписания
+
+    ClientDTO:
+      title: Client
+      type: object
+      description: Информация о клиенте.
+      properties:
+        firstName:
+          type: string
+          example: Ivan
+          description: Имя клиента
+        lastName:
+          type: string
+          example: Ivanov
+          description: Фамилия клиента
+        middleName:
+          type: string
+          example: Ivanonovich
+          description: Отчество клиента (при наличии).
+        birthDate:
+          type: string
+          format: date
+          example: 1997-02-18
+          description: Дата рождения
+        email:
+          type: string
+          example: ivanov@email.com
+          description: Эл. почта клиента.
+        gender:
+          type: string
+          example: MALE
+          description: Пол клиента.
+        maritalStatus:
+          type: string
+          example: SINGLE
+          description: Семейное положение клиента.
+        dependentAmount:
+          type: integer
+          example: 1
+          description: Количество иждивенцев клиента.
+        passportId:
+          $ref: '#/components/schemas/PassportDTO'
+        accountNumber:
+          type: string
+          example: 11223344556677889900
+          description: Основной счет клиента.
+
+    PassportDTO:
+      title: Паспортные данные
+      type: object
+      description: Паспортные данные клиента.
+      properties:
+        series:
+          type: string
+          pattern: '^([0-9]{4})$'
+          example: 1234
+          description: Серия паспорта.
+        number:
+          type: string
+          pattern: '^([0-9]{6})$'
+          example: 123456
+          description: Номер паспорта.
+        issueDate:
+          type: string
+          format: date
+          example: 2016-11-27
+          description: Дата выдачи паспорта.
+        issueBranch:
+          type: string
+          example: 123-456
+          description: Отделение по выдаче паспортов.

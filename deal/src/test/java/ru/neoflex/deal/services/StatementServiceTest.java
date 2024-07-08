@@ -77,7 +77,7 @@ class StatementServiceTest {
 
         Statement savedStatement = statementService.buildStatement(savedClient);
 
-        Statement updatedStatement = statementService.updateStatementStatus(savedStatement, StatementStatus.PREAPPROVAL);
+        Statement updatedStatement = statementService.updateStatementStatus(savedStatement.getStatementId(), StatementStatus.PREAPPROVAL);
 
         assertNotNull(updatedStatement);
         assertEquals(StatementStatus.PREAPPROVAL, updatedStatement.getStatus());
