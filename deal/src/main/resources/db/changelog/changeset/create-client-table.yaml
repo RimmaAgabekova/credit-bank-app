@@ -14,41 +14,27 @@ databaseChangeLog:
               - column:
                   name: last_name
                   type: varchar
-
               - column:
                   name: first_name
                   type: varchar
-
-
               - column:
                   name: middle_name
                   type: varchar
-
-
               - column:
                   name: birth_date
                   type: date
-
-
               - column:
                   name: email
                   type: varchar
-
-
               - column:
                   name: gender
                   type: varchar
-
               - column:
                   name: marital_status
                   type: varchar
-
-
               - column:
                   name: dependent_amount
                   type: int
-
-
               - column:
                   name: passport_id
                   type: uuid
@@ -57,7 +43,6 @@ databaseChangeLog:
                     referencedTableName: passport
                     referencedColumnNames: passport
                     nullable: true
-
               - column:
                   name: employment_id
                   type: uuid
@@ -66,8 +51,9 @@ databaseChangeLog:
                     referencedTableName: employment
                     referencedColumnNames: employment
                     nullable: true
-
               - column:
                   name: account_number
                   type: varchar
-
+      rollback:
+        - dropTable:
+            tableName: client
