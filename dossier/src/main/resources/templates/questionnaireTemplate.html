@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Arial', 'sans-serif', 'Noto Sans';
+      font-size: 14px;
+    }
+    .questionnaire {
+      border: 1px solid #000;
+      border-collapse: collapse;
+    }
+    th {
+      border: 1px solid #000;
+      padding: 3px;
+    }
+    td {
+      border: 1px solid #000;
+      padding: 3px;
+    }
+  </style>
+</head>
+<body>
+<h2><b><span>Анкета-Соглашение Заемщика на предоставление кредита</span></b></h2>
+<p style="text-indent: 25px;">Я подтверждаю, что все персональные данные, указанне в анкете, являются достоверными и понимаю, что за предоставление ложной,
+  недостоверной информации предусмотрена ответственность согласно нормам действующего законодательства. Я подтверждаю, что мне
+  разъяснены юридические последствия отказа предоставить мои персональные данные и дать согласие на их обработку.</p>
+
+<table class="questionnaire">
+
+  <h3> Информация о клиенте:</h3>
+  <tr><th>Фамилия Имя Отчество</th> <td th:text="${statement.getClientId().getLastName() +' '+ statement.getClientId().getFirstName() +' '+ statement.getClientId().getMiddleName()}">ФИО</td> </tr>
+  <tr><th>Дата рождения</th>  <td th:text="${statement.getClientId().getBirthDate()}">Дата рождения</td> </tr>
+  <tr><th>Пол</th> <td th:text="${statement.getClientId().getGender()}"> <div>Пол </div></td> </tr>
+  <tr><th>Паспортные данные</th> <td th:text="${statement.getClientId().getPassportId().getSeries() +' '+ statement.getClientId().getPassportId().getNumber() +' '+ statement.getClientId().getPassportId().getIssueBranch() +' '+ statement.getClientId().getPassportId().getIssueDate()}">Паспортные данные</td> </tr>
+  <tr> <th>Семейное положение</th>  <td th:text="${statement.getClientId().getMaritalStatus()}">Семейное положение</td> </tr>
+  <tr> <th>Контактные данные</th>  <td th:text="${statement.getClientId().getEmail()}">Контактные данные</td> </tr>
+</table>
+
+<p>Дата:  <time th:text="${statement.getCreationDate()}">дата </time></p>
+
+<br>
+<p>С Уважением, NEO BANK!</p>
+</body>
+</html>
