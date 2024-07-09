@@ -29,6 +29,7 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
+
     public void sendHtmlMessage(EmailMessage emailMessage, EmailData dataForEmail) {
         Context context = new Context();
         context.setVariable("payload", dataForEmail);
@@ -38,7 +39,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(emailMessage.getAddress());
-            helper.setSubject(emailMessage.getTheme().toString());
+            helper.setSubject(dataForEmail.getSubject());
             helper.setText(emailContent, true);
             helper.setFrom(serverEmail);
 

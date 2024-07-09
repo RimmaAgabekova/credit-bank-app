@@ -1,11 +1,13 @@
 package ru.neoflex.deal.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.neoflex.deal.mappers.StatementMapper;
 import ru.neoflex.deal.model.dto.LoanOfferDTO;
 import ru.neoflex.deal.model.dto.LoanStatementRequestDTO;
 import ru.neoflex.deal.model.dto.StatementStatus;
@@ -28,11 +30,14 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
+@RequiredArgsConstructor
 class StatementServiceTest {
     @InjectMocks
     private StatementService statementService;
     @Mock
     private StatementRepository statementRepository;
+
+    private final StatementMapper statementMapper;
 
     @Test
     void createAndSaveStatementShouldReturnFilledData() {
@@ -43,7 +48,7 @@ class StatementServiceTest {
                 .statusHistory(new ArrayList<>())
                 .build();
 
-        Statement savedStatement = statementService.buildStatement(client);
+        Statement savedStatement = statementMapper.buildStatement(client);
 
         assertNotNull(savedStatement);
         assertEquals(mockStatement.getStatementId(), savedStatement.getStatementId());
@@ -75,9 +80,9 @@ class StatementServiceTest {
 
         Client savedClient = new Client();
 
-        Statement savedStatement = statementService.buildStatement(savedClient);
+        Statement savedStatement = statementMapper.buildStatement(savedClient);
 
-        Statement updatedStatement = statementService.updateStatementStatus(savedStatement.getStatementId(), StatementStatus.PREAPPROVAL);
+        Statement updatedStatement = statementService.updateStatementStatus(savedStatement, StatementStatus.PREAPPROVAL);
 
         assertNotNull(updatedStatement);
         assertEquals(StatementStatus.PREAPPROVAL, updatedStatement.getStatus());
@@ -100,9 +105,11 @@ class StatementServiceTest {
     }
     @Test
     void updateStatementSchedule() {
+        LoanOfferDTO loanOffer = createLoanOfferDto();
+        Statement statement = createStatement(loanOffer);
         when(statementRepository.findById(any())).thenReturn(Optional.ofNullable(createStatement(createLoanOfferDto())));
-        when(statementRepository.save(any())).thenReturn(createStatement(createLoanOfferDto()));
-        statementService.updateStatement(createLoanOfferDto());
+        when(statementRepository.save(any())).thenReturn(statement);
+        statementService.updateStatement(statement, loanOffer);
 
         assertEquals(createStatement(createLoanOfferDto()), statementRepository.save(any()));
     }

@@ -6,12 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neoflex.deal.enums.CreditStatus;
 import ru.neoflex.deal.exception.SesCodeException;
-import ru.neoflex.deal.mappers.EmailMessageMapper;
 import ru.neoflex.deal.model.dto.EmailMessage;
 import ru.neoflex.deal.models.Statement;
 
+import java.time.LocalDate;
 import java.util.Random;
-import java.util.UUID;
 
 import static ru.neoflex.deal.model.dto.StatementStatus.*;
 
@@ -22,60 +21,42 @@ import static ru.neoflex.deal.model.dto.StatementStatus.*;
 public class DocumentService {
 
     private final KafkaService kafkaService;
-
     private final StatementService statementService;
-
-    private final EmailMessageMapper emailMessageMapper;
     private final Random random = new Random();
 
-    public void sendCreateDocumentRequest(EmailMessage massage) {
-        kafkaService.sendTopic(massage);
+    public void sendCreateDocumentRequest(Statement statement) {
+        kafkaService.sendMessage(EmailMessage.ThemeEnum.CREATE_DOCUMENTS, statement);
     }
 
-    public void sendSendDocumentRequest(UUID statementId) {
-        Statement statement = statementService.getStatementById(statementId);
-        Statement updateStatus = statementService.updateStatementStatus(statement.getStatementId(), PREPARE_DOCUMENTS);
-        log.info("Обновлен статус заявки {} на: {}", statementId, updateStatus);
-
-        String clientEmail = statement.getClientId().getEmail();
-
-        EmailMessage message = emailMessageMapper.createEmailMassage(EmailMessage.ThemeEnum.SEND_DOCUMENTS, statementId, clientEmail);
-        kafkaService.sendTopic(message);
+    public void sendSendDocumentRequest(Statement statement) {
+        Statement updateStatus = statementService.updateStatementStatus(statement, PREPARE_DOCUMENTS);
+        log.info("Обновлен статус заявки {} на: {}", statement.getStatementId(), updateStatus);
+        kafkaService.sendMessage(EmailMessage.ThemeEnum.SEND_DOCUMENTS, statement);
     }
 
-    public void sendSignDocumentRequest(UUID statementId) {
-        Statement statement = statementService.getStatementById(statementId);
-        Integer sesCode = random.nextInt(10000);
-        statement.setSesCode(sesCode);
-        log.info("Для заявки {} сгенерирован код подписания: {}", statement.getStatementId(), sesCode);
-
-        String clientEmail = statement.getClientId().getEmail();
-
-        EmailMessage message = emailMessageMapper.createEmailMassage(EmailMessage.ThemeEnum.SEND_SES, statementId, clientEmail);
-        kafkaService.sendTopic(message);
+    public void sendSignDocumentRequest(Statement statement) {
+        statement.setSesCode(random.nextInt(10000));
+        log.info("Для заявки {} сгенерирован код подписания: {}", statement.getStatementId(), statement.getSesCode());
+        kafkaService.sendMessage(EmailMessage.ThemeEnum.SEND_SES, statement);
     }
 
-    public void sendCreditIssueRequest(UUID statementId, Integer sesCode) {
+    public void sendCreditIssueRequest(Statement statement, Integer sesCode) {
         log.info("От клиента получен код: {}", sesCode);
-        Statement statement = statementService.getStatementById(statementId);
 
         if (!statement.getSesCode().equals(sesCode)) {
             throw new SesCodeException("Неверный код");
         }
 
-        statementService.updateStatementStatus(statement.getStatementId(), DOCUMENT_SIGNED);
-        statementService.updateStatementStatus(statement.getStatementId(), CREDIT_ISSUED);
+        statementService.updateStatementStatus(statement, DOCUMENT_SIGNED);
+        statementService.updateStatementStatus(statement, CREDIT_ISSUED);
+        statement.setSignDate(LocalDate.now());
         log.info("Обновленная заявка сохранена в БД");
 
-        String clientEmail = statement.getClientId().getEmail();
-
-        EmailMessage message = emailMessageMapper.createEmailMassage(EmailMessage.ThemeEnum.CREDIT_ISSUED, statementId, clientEmail);
-        kafkaService.sendTopic(message);
-
+        kafkaService.sendMessage(EmailMessage.ThemeEnum.CREDIT_ISSUED, statement);
         statement.getCreditId().setCreditStatus(CreditStatus.ISSUED.toString());
     }
 
-    public void sendStatementDeniedRequest(EmailMessage message) {
-        kafkaService.sendTopic(message);
+    public void sendStatementDeniedRequest(Statement statement) {
+        kafkaService.sendMessage(EmailMessage.ThemeEnum.STATEMENT_DENIED, statement);
     }
 }

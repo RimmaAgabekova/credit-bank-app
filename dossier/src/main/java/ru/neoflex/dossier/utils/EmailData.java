@@ -9,7 +9,7 @@ import java.util.Map;
 @Data
 @Builder(toBuilder = true)
 public class EmailData {
-    private String headerText;
+    private String subject;
     private String contentText;
     private String linkForClient;
     private Map<String, DataSource> attachments;

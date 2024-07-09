@@ -10,7 +10,7 @@
     </style>
 </head>
 <body>
-    <h1 th:text="${payload.getHeaderText() != null ? payload.getHeaderText() : 'Уважаемый клиент!'}">Уважаемый клиент</h1>
+    <h1>Уважаемый клиент!</h1>
     <p th:text="${payload.getContentText()}">Default text</p>
     <br>
     <div th:if="${payload.getLinkForClient() != null}">

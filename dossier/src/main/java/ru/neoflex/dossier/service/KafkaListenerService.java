@@ -30,6 +30,7 @@ public class KafkaListenerService {
     public void sendFinishRegistrationRequest(String message) {
         EmailMessage emailMessage = getEmailMessageFromJson(message);
         EmailData dataForEmail = EmailData.builder()
+                .subject("Завершение регистрации")
                 .contentText("Завершите регистрацию по заявке №" + emailMessage.getStatementId())
                 .build();
         emailService.sendHtmlMessage(emailMessage, dataForEmail);
@@ -40,6 +41,7 @@ public class KafkaListenerService {
     public void sendCreateDocumentsRequest(String message) {
         EmailMessage emailMessage = getEmailMessageFromJson(message);
         EmailData dataForEmail = EmailData.builder()
+                .subject("Создание документов")
                 .contentText("Отправьте запрос для оформления документов по заявке №"
                         + emailMessage.getStatementId())
                 .linkForClient(SWAGGER_URL)
@@ -53,6 +55,7 @@ public class KafkaListenerService {
         EmailMessage emailMessage = getEmailMessageFromJson(message);
 
         EmailData dataForEmail = EmailData.builder()
+                .subject("Документы по кредиту")
                 .contentText("Ваши документы по кредитной заявке №" + emailMessage.getStatementId() + " сформированы")
                 .attachments(documentsService.createCreditDocuments(emailMessage))
                 .build();
@@ -67,6 +70,7 @@ public class KafkaListenerService {
         EmailMessage emailMessage = getEmailMessageFromJson(message);
         StatementDTO statement = dealFeignClient.statementData(emailMessage.getStatementId().toString());
         EmailData dataForEmail = EmailData.builder()
+                .subject("Код подписания")
                 .contentText(MessageFormat.format("Подпишите с помощью кода документы по кредитной заявке №{0}. " +
                         "Код подписания: {1}", emailMessage.getStatementId(), statement.getSesCode()))
                 .build();
@@ -78,6 +82,7 @@ public class KafkaListenerService {
     public void sendCreditIssueRequest(String message) {
         EmailMessage emailMessage = getEmailMessageFromJson(message);
         EmailData dataForEmail = EmailData.builder()
+                .subject("Подтверждение успешной выдачи кредита")
                 .contentText("Поздравляем! Вам выдан кредит по заявке №" + emailMessage.getStatementId())
                 .build();
         emailService.sendHtmlMessage(emailMessage, dataForEmail);
@@ -88,6 +93,7 @@ public class KafkaListenerService {
     public void sendApplicationDeniedMessage(String message) {
         EmailMessage emailMessage = getEmailMessageFromJson(message);
         EmailData dataForEmail = EmailData.builder()
+                .subject("Отмена выдачи кредита")
                 .contentText("К сожалению, Вам отказано в выдаче кредита по заявке №" + emailMessage.getStatementId())
                 .build();
         emailService.sendHtmlMessage(emailMessage, dataForEmail);

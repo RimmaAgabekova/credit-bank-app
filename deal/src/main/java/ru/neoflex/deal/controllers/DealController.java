@@ -28,7 +28,7 @@ public class DealController implements DealControllerApi {
 
     @Override
     public void select(LoanOfferDTO loanOfferDTO) {
-        statementService.updateStatement(loanOfferDTO);
+        statementService.updateStatement(statementService.getStatementById(loanOfferDTO.getStatementId()), loanOfferDTO);
     }
 
     @Override

@@ -16,7 +16,7 @@
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <openapi-generator-maven-plugin.version>7.1.0</openapi-generator-maven-plugin.version>
         <lombok.version>1.18.32</lombok.version>
-        <kernel.version>8.0.2</kernel.version>
+        <kernel.version>7.1.12</kernel.version>
         <html2pdf.version>3.0.1</html2pdf.version>
     </properties>
     <dependencies>
@@ -61,12 +61,12 @@
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>kernel</artifactId>
-            <version>7.1.12</version>
+            <version>${kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>html2pdf</artifactId>
-            <version>3.0.1</version>
+            <version>${html2pdf.version}</version>
         </dependency>
     </dependencies>
 

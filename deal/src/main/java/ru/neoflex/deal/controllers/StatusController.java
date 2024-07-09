@@ -15,6 +15,6 @@ public class StatusController implements StatusControllerApi {
 
     @Override
     public void status(String statementId, @NotNull String newStatus) {
-        statementService.updateStatementStatus(UUID.fromString(statementId), StatementStatus.fromValue(newStatus));
+        statementService.updateStatementStatus(statementService.getStatementById(UUID.fromString(statementId)), StatementStatus.fromValue(newStatus));
     }
 }

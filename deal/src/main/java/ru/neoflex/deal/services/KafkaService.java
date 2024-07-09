@@ -7,7 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import ru.neoflex.deal.mappers.EmailMessageMapper;
 import ru.neoflex.deal.model.dto.EmailMessage;
+import ru.neoflex.deal.models.Statement;
 
 @Slf4j
 @Service
@@ -29,8 +31,9 @@ public class KafkaService {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final EmailMessageMapper emailMessageMapper;
 
-    public void sendTopic(EmailMessage message) {
+    public void sendToTopic(EmailMessage message) {
         kafkaTemplate.send(getTopic(message.getTheme()), getMessageJson(message));
         log.info("Сообщение отправлено в мс dossier: {}", message);
     }
@@ -59,6 +62,15 @@ public class KafkaService {
             }
         }
         return topic;
+    }
+
+    public void sendMessage(EmailMessage.ThemeEnum theme, Statement statement) {
+        EmailMessage message = emailMessageMapper.createEmailMassage(
+                theme,
+                statement.getStatementId(),
+                statement.getClientId().getEmail()
+        );
+        sendToTopic(message);
     }
 
     private String getMessageJson(EmailMessage message) {

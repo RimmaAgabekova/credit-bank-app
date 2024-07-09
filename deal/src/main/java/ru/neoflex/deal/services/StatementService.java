@@ -5,18 +5,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.neoflex.deal.exception.DeniedException;
 import ru.neoflex.deal.feign.CalculatorFeignClient;
 import ru.neoflex.deal.mappers.ClientMapper;
-import ru.neoflex.deal.mappers.EmailMessageMapper;
 import ru.neoflex.deal.mappers.StatementDTOMapper;
+import ru.neoflex.deal.mappers.StatementMapper;
+import ru.neoflex.deal.mappers.StatementStatusHistoryMapper;
 import ru.neoflex.deal.model.dto.*;
-import ru.neoflex.deal.models.Client;
 import ru.neoflex.deal.models.Statement;
 import ru.neoflex.deal.repositories.StatementRepository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,16 +28,15 @@ public class StatementService {
     private final CalculatorFeignClient calculatorFeignClient;
     private final ClientMapper clientMapper;
     private final KafkaService kafkaService;
-    private final EmailMessageMapper emailMessageMapper;
     private final StatementDTOMapper statementDTOMapper;
+    private final StatementMapper statementMapper;
+    private final StatementStatusHistoryMapper statementStatusHistoryMapper;
 
     public List<LoanOfferDTO> createStatement(LoanStatementRequestDTO request) {
-        Client client = clientMapper.loanRequestToClient(request);
-        log.info("Создали клиента - {}", client.getClientId());
+        log.info("Пришли данные по заявке = {}", request);
+        Statement createStatement = statementMapper.buildStatement(clientMapper.loanRequestToClient(request));
 
-        Statement createStatement = buildStatement(client);
-        save(createStatement);
-        updateStatementStatus(createStatement.getStatementId(), StatementStatus.PREAPPROVAL);
+        updateStatementStatus(createStatement, StatementStatus.PREAPPROVAL);
         Statement savedStatement = save(createStatement);
 
         List<LoanOfferDTO> loanOffers = calculatorFeignClient.offers(request);
@@ -50,35 +47,20 @@ public class StatementService {
         return loanOffers;
     }
 
-    public Statement buildStatement(Client client) {
-        return Statement.builder()
-                .clientId(client)
-                .creationDate(LocalDate.now())
-                .statusHistory(new ArrayList<>())
-                .build();
-    }
-
-    public Statement updateStatementStatus(UUID statementId, StatementStatus status) {
-        Statement statement = getStatementById(statementId);
+    public Statement updateStatementStatus(Statement statement, StatementStatus status) {
         statement.setStatus(status);
-        statement.getStatusHistory().add(StatementStatusHistoryDTO.builder()
-                .status(status)
-                .time(LocalDateTime.now())
-                .changeType(StatementStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC)
-                .build());
+        statement.getStatusHistory().add(statementStatusHistoryMapper.addStatus(status, StatementStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC));
         return statement;
     }
 
-    public void updateStatement(LoanOfferDTO loanOffer) {
-        Statement statement = getStatementById(loanOffer.getStatementId());
-        updateStatementStatus(statement.getStatementId(), StatementStatus.APPROVED);
+    public void updateStatement(Statement statement, LoanOfferDTO loanOffer) {
+        if (statement.getStatus() != StatementStatus.PREAPPROVAL) {
+            throw new DeniedException("На данном этапе загрузка данных не допускается!");
+        }
 
+        updateStatementStatus(statement, StatementStatus.APPROVED);
         statement.setAppliedOffer(loanOffer);
-
-        String clientEmail = statement.getClientId().getEmail();
-        EmailMessage message = emailMessageMapper.createEmailMassage(EmailMessage.ThemeEnum.FINISH_REGISTRATION,
-                statement.getStatementId(), clientEmail);
-        kafkaService.sendTopic(message);
+        kafkaService.sendMessage(EmailMessage.ThemeEnum.FINISH_REGISTRATION, statement);
     }
 
     public Statement getStatementById(UUID statementId) {
@@ -87,12 +69,11 @@ public class StatementService {
     }
 
     public StatementDTO getStatementDTO(UUID statementId) {
-        Statement statement = getStatementById(statementId);
-        return statementDTOMapper.statementToStatementDto(statement);
+        return statementDTOMapper.statementToStatementDto(getStatementById(statementId));
     }
 
     public Statement save(Statement statement) {
-        return statementRepository.save(statement);
+        return statementRepository.saveAndFlush(statement);
     }
 
 }
