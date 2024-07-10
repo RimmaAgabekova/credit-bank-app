@@ -1,0 +1,247 @@
+openapi: 3.0.3
+info:
+  title: openapi-generation
+  version: 1.0.1
+
+servers:
+  - url: http://localhost:8083/
+
+paths: {}
+
+components:
+  schemas:
+
+    EmailMessage:
+      title:  Сообщение электронной почты
+      type: object
+      description: Электронная почта для отправки данных в микросервис Досье
+      properties:
+        address:
+          type: string
+          example: agabekova@gmail.com
+          description: Адрес электронной почты клиента
+        theme:
+          type: string
+          enum:
+            - FINISH_REGISTRATION
+            - CREATE_DOCUMENTS
+            - SEND_DOCUMENTS
+            - SEND_SES
+            - CREDIT_ISSUED
+            - STATEMENT_DENIED
+          example: FINISH_REGISTRATION
+          description: Тема письма
+        statementId:
+          type: string
+          format: uuid
+          description: идентификатор заявления.
+
+    StatementDTO:
+      title: Statement
+      type: object
+      description: Вся информация по заявке.
+      properties:
+        statementId:
+          type: string
+          format: uuid
+          description: идентификатор заявления.
+        clientId:
+          $ref: '#/components/schemas/ClientDTO'
+        creditId:
+          $ref: '#/components/schemas/CreditDTO'
+        status:
+          $ref: '#/components/schemas/StatementStatus'
+        creationDate:
+          type: string
+          format: date
+          example: 22-05-04
+          description: Дата создания заявки
+        signDate:
+          type: string
+          format: date
+          example: 2022-05-01
+          description: Дата подписания заявки
+        sesCode:
+          type: string
+          example: 1234
+          description: Код подписания
+
+    StatementStatus:
+      title: статус заявления
+      type: string
+      enum:
+        - PREAPPROVAL
+        - APPROVED
+        - CC_DENIED
+        - CC_APPROVED
+        - PREPARE_DOCUMENTS
+        - DOCUMENT_CREATED
+        - CLIENT_DENIED
+        - DOCUMENT_SIGNED
+        - CREDIT_ISSUED
+      example: APPROVED
+      description: Статус заявления
+
+    CreditDTO:
+      title: Credit
+      type: object
+      description: Информация о кредите
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 1000000.00
+          description: Запрашиваемая сумма кредита.
+        term:
+          type: integer
+          example: 24
+          description: Запрашиваемый срок кредитования (месяцы).
+        monthlyPayment:
+          type: number
+          format: double
+          example: 10000.10
+          description: Ежемесячный платеж.
+        rate:
+          type: number
+          format: double
+          example: 12.50
+          description: Ставка по кредиту
+        psk:
+          type: number
+          format: double
+          example: 12.50
+          description: Полная стоимость кредита
+        isInsuranceEnabled:
+          type: boolean
+          example: true
+          description: Включена ли страховка?
+        isSalaryClient:
+          type: boolean
+          example: true
+          description: Является зарплатным клиентом
+        paymentSchedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentScheduleElementDTO'
+          description: График платежей
+
+    PaymentScheduleElementDTO:
+      title: Payment schedule element
+      type: object
+      description: Элемент графика платежей.
+      properties:
+        number:
+          type: integer
+          example: 1
+          description: Порядковый номер платежа.
+        date:
+          type: string
+          format: date
+          example: 2022-06-01
+          description: Дата платежа.
+        totalPayment:
+          type: number
+          format: double
+          example: 12000.00
+          description: Общая сумма платежа.
+        interestPayment:
+          type: number
+          format: double
+          example: 12000.00
+          description: Сумма выплаты процентов.
+        debtPayment:
+          type: number
+          format: double
+          example: 5000.00
+          description: Сумма выплаты по основному долгу.
+        remainingDebt:
+          type: number
+          format: double
+          example: 95000.00
+          description: Оставшаяся сумма долга.
+
+    StatementStatusHistoryDTO:
+      title: История статуса заявки
+      type: object
+      description: История изменений статуса приложения.
+      properties:
+        status:
+          $ref: '#/components/schemas/StatementStatus'
+        time:
+          type: string
+          format: localdatetime
+        changeType:
+          type: string
+          enum:
+            - AUTOMATIC
+            - MANUAL
+
+    ClientDTO:
+      title: Client
+      type: object
+      description: Информация о клиенте.
+      properties:
+        firstName:
+          type: string
+          example: Ivan
+          description: Имя клиента
+        lastName:
+          type: string
+          example: Ivanov
+          description: Фамилия клиента
+        middleName:
+          type: string
+          example: Ivanonovich
+          description: Отчество клиента (при наличии).
+        birthDate:
+          type: string
+          format: date
+          example: 1997-02-18
+          description: Дата рождения
+        email:
+          type: string
+          example: ivanov@email.com
+          description: Эл. почта клиента.
+        gender:
+          type: string
+          example: MALE
+          description: Пол клиента.
+        maritalStatus:
+          type: string
+          example: SINGLE
+          description: Семейное положение клиента.
+        dependentAmount:
+          type: integer
+          example: 1
+          description: Количество иждивенцев клиента.
+        passportId:
+          $ref: '#/components/schemas/PassportDTO'
+        accountNumber:
+          type: string
+          example: 11223344556677889900
+          description: Основной счет клиента.
+
+    PassportDTO:
+      title: Паспортные данные
+      type: object
+      description: Паспортные данные клиента.
+      properties:
+        series:
+          type: string
+          pattern: '^([0-9]{4})$'
+          example: 1234
+          description: Серия паспорта.
+        number:
+          type: string
+          pattern: '^([0-9]{6})$'
+          example: 123456
+          description: Номер паспорта.
+        issueDate:
+          type: string
+          format: date
+          example: 2016-11-27
+          description: Дата выдачи паспорта.
+        issueBranch:
+          type: string
+          example: 123-456
+          description: Отделение по выдаче паспортов.

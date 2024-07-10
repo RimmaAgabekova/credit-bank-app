@@ -1,17 +1,17 @@
-package ru.neoflex.deal;
+package ru.neoflex.dossier;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
+@Slf4j
 @EnableFeignClients
 @SpringBootApplication
-@Slf4j
-public class DealApplication {
+public class DossierApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DealApplication.class, args);
-        log.info("Микросервис deal запущен");
+        SpringApplication.run(DossierApplication.class, args);
+        log.info("Микросервис dossier запущен");
     }
 }

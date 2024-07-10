@@ -43,3 +43,6 @@ databaseChangeLog:
               - column:
                   name: status_history
                   type: jsonb
+      rollback:
+        - dropTable:
+            tableName: statement

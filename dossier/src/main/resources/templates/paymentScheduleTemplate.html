@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Arial', 'sans-serif', 'Noto Sans';
+            font-size: 14px;
+        }
+
+        .payment-schedule {
+            border: 1px solid #000;
+            border-collapse: collapse;
+        }
+
+        th {
+            border: 1px solid #000;
+            padding: 3px;
+        }
+
+        td {
+            border: 1px solid #000;
+            padding: 3px;
+        }
+    </style>
+</head>
+<body>
+<h1>Уважаем<span th:text="${statement.getClientId().getGender() == 'MALE' ? 'ый' : 'ая' }">ый(ая)</span>
+    <span th:text="${statement.getClientId().getFirstName()+' '+statement.getClientId().getLastName()}">клиент!</span>
+</h1>
+<p>При заполнении документа для погашения необходимо указать следующие реквизиты:</p>
+<p>Наименование получателя: <b>NEO-BANK</b></p>
+<p>Назначение платежа: Погашение задолженности
+    <b><span
+            th:text="${statement.getClientId().getLastName()+' '+statement.getClientId().getFirstName()+' '+statement.getClientId().getMiddleName()}">ФИО </span></b>
+    по Договору потребительского кредита <b>№<span th:text="${statement.getStatementId()}">ДОГОВОР</span></b>
+    , л/сч <b><span th:text="${statement.getClientId().getAccountNumber()}">СЧЕТ</span></b></p>
+<br>
+
+<table class="payment-schedule">
+    <tr>
+        <th>Взнос</th>
+        <th>Дата платежа</th>
+        <th>Сумма основного долга</th>
+        <th>Сумма процентов</th>
+        <th>Взнос всего</th>
+        <th>Остаток задолженности</th>
+    </tr>
+    <tr th:each="payment : ${statement.getCreditId().getPaymentSchedule()}">
+        <td th:text="${payment.getNumber()}">Взнос</td>
+        <td th:text="${payment.getDate()}">Дата</td>
+        <td th:text="${payment.getDebtPayment()}">Основной долг</td>
+        <td th:text="${payment.getInterestPayment()}">Проценты</td>
+        <td th:text="${payment.getTotalPayment()}">Всего</td>
+        <td th:text="${payment.getRemainingDebt()}">Остаток</td>
+    </tr>
+</table>
+
+<br>
+<p>С Уважением, NEO BANK!</p>
+</body>
+</html>

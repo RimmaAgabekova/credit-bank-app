@@ -46,7 +46,6 @@ paths:
         404:
           description: не найдено
 
-
   /api/v1/deal/calculate/{statementId}:
     post:
       tags:
@@ -56,6 +55,7 @@ paths:
       parameters:
         - name: statementId
           in: path
+          description: id заявки
           required: true
           schema:
             type: string
@@ -68,6 +68,117 @@ paths:
           description: некорректные данные
         404:
           description: не найдено
+
+  /api/v1/deal/document/{statementId}/send:
+    post:
+      tags:
+        -  DocumentController
+      summary: запрос на отправку документов
+      operationId: send
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
+
+  /api/v1/deal/document/{statementId}/sign :
+    post:
+      tags:
+        -  DocumentController
+      summary: запрос на подписание документов
+      operationId: sign
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
+
+  /api/v1/deal/document/{statementId}/code:
+    post:
+      tags:
+        -  DocumentController
+      summary: подписание документов
+      operationId: code
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+        - name: ses-code
+          in: header
+          description: код подписания
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
+
+  /api/v1/deal/admin/statement/{statementId}/status:
+    put:
+      tags:
+        - StatusController
+      summary: обновление статуса
+      operationId: status
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+        - name: newStatus
+          in: query
+          description: введите новый статус
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
+
+  /api/v1/deal/admin/statement/{statementId}/statement-data:
+    get:
+      tags:
+        - DealController
+      summary: Получение данных по заявке
+      operationId: statementData
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatementDTO'
+        400:
+          description: некорректные данные
 
 components:
   requestBodies:
@@ -112,6 +223,37 @@ components:
           schema:
             $ref: '#/components/schemas/FinishRegistrationRequestDto'
 
+    sendRequest:
+      description: запрос на отправку документов.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailMessage'
+
+    signRequest:
+      description: запрос на подписание документов.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailMessage'
+
+    codeRequest:
+      description: подписание документов.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailMessage'
+
+    statusRequest:
+      description: обновление статуса.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatementStatus'
 
   schemas:
     LoanStatementRequestDTO:
@@ -444,8 +586,6 @@ components:
           example: 95000.00
           description: Оставшаяся сумма долга.
 
-
-
     FinishRegistrationRequestDto:
       title: завершение регистрации и полный подсчёт кредита
       type: object
@@ -509,7 +649,6 @@ components:
       example: SINGLE
       description: Семейное положение клиента.
 
-
     StatementStatus:
       title: статус заявления
       type: string
@@ -526,11 +665,127 @@ components:
       example: APPROVED
       description: Статус заявления
 
+    EmailMessage:
+      title:  Сообщение электронной почты
+      type: object
+      description: Электронная почта для отправки данных в микросервис Досье
+      properties:
+        address:
+          type: string
+          example: agabekova@gmail.com
+          description: Адрес электронной почты клиента
+        theme:
+          type: string
+          enum:
+            - FINISH_REGISTRATION
+            - CREATE_DOCUMENTS
+            - SEND_DOCUMENTS
+            - SEND_SES
+            - CREDIT_ISSUED
+            - STATEMENT_DENIED
+          example: FINISH_REGISTRATION
+          description: Тема письма
+        statementId:
+          type: string
+          format: uuid
+          description: идентификатор заявления.
 
+    StatementDTO:
+      title: Statement
+      type: object
+      description: Вся информация по заявке.
+      properties:
+        statementId:
+          type: string
+          format: uuid
+          description: идентификатор заявления.
+        clientId:
+          $ref: '#/components/schemas/ClientDTO'
+        creditId:
+          $ref: '#/components/schemas/CreditDTO'
+        status:
+          $ref: '#/components/schemas/StatementStatus'
+        creationDate:
+          type: string
+          format: date
+          example: 22-05-04
+          description: Дата создания заявки
+        signDate:
+          type: string
+          format: date
+          example: 2022-05-01
+          description: Дата подписания заявки
+        sesCode:
+          type: string
+          example: 1234
+          description: Код подписания
 
+    ClientDTO:
+      title: Client
+      type: object
+      description: Информация о клиенте.
+      properties:
+        firstName:
+          type: string
+          example: Ivan
+          description: Имя клиента
+        lastName:
+          type: string
+          example: Ivanov
+          description: Фамилия клиента
+        middleName:
+          type: string
+          example: Ivanonovich
+          description: Отчество клиента (при наличии).
+        birthDate:
+          type: string
+          format: date
+          example: 1997-02-18
+          description: Дата рождения
+        email:
+          type: string
+          example: ivanov@email.com
+          description: Эл. почта клиента.
+        gender:
+          type: string
+          example: MALE
+          description: Пол клиента.
+        maritalStatus:
+          type: string
+          example: SINGLE
+          description: Семейное положение клиента.
+        dependentAmount:
+          type: integer
+          example: 1
+          description: Количество иждивенцев клиента.
+        passportId:
+          $ref: '#/components/schemas/PassportDTO'
+        accountNumber:
+          type: string
+          example: 11223344556677889900
+          description: Основной счет клиента.
 
-
-
-
-
-
+    PassportDTO:
+      title: Паспортные данные
+      type: object
+      description: Паспортные данные клиента.
+      properties:
+        series:
+          type: string
+          pattern: '^([0-9]{4})$'
+          example: 1234
+          description: Серия паспорта.
+        number:
+          type: string
+          pattern: '^([0-9]{6})$'
+          example: 123456
+          description: Номер паспорта.
+        issueDate:
+          type: string
+          format: date
+          example: 2016-11-27
+          description: Дата выдачи паспорта.
+        issueBranch:
+          type: string
+          example: 123-456
+          description: Отделение по выдаче паспортов.

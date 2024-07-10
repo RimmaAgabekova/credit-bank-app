@@ -7,16 +7,17 @@
         <artifactId>credit-bank-app</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>statement</artifactId>
+    <artifactId>dossier</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>statement</name>
-    <description>statement</description>
+    <name>dossier</name>
+    <description>dossier</description>
     <properties>
         <java.version>17</java.version>
         <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
         <openapi-generator-maven-plugin.version>7.1.0</openapi-generator-maven-plugin.version>
-        <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
         <lombok.version>1.18.32</lombok.version>
+        <kernel.version>7.1.12</kernel.version>
+        <html2pdf.version>3.0.1</html2pdf.version>
     </properties>
     <dependencies>
         <dependency>
@@ -44,6 +45,28 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>kernel</artifactId>
+            <version>${kernel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>html2pdf</artifactId>
+            <version>${html2pdf.version}</version>
         </dependency>
     </dependencies>
 
@@ -92,15 +115,15 @@
                         </goals>
                         <configuration>
                             <generatorName>spring</generatorName>
-                            <apiPackage>ru.neoflex.statement.controllers</apiPackage>
-                            <modelPackage>ru.neoflex.statement.model.dto</modelPackage>
+                            <apiPackage>ru.neoflex.dossier.controllers</apiPackage>
+                            <modelPackage>ru.neoflex.dossier.model.dto</modelPackage>
                             <typeMappings>
                                 <typeMapping>utildate=java.util.Date</typeMapping>
                                 <typeMapping>double=java.math.BigDecimal</typeMapping>
                                 <typeMapping>localdatetime=java.time.LocalDateTime</typeMapping>
                                 <typeMapping>timestamp=java.sql.Timestamp</typeMapping>
                             </typeMappings>
-                            <inputSpec>${project.basedir}/src/main/resources/openapiStatement.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapiDossier.yaml</inputSpec>
                             <configOptions>
                                 <useResponseEntity>false</useResponseEntity>
                                 <useSpringBoot3>true</useSpringBoot3>

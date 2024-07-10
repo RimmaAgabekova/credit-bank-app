@@ -26,3 +26,6 @@ databaseChangeLog:
               - column:
                   name: issue_date
                   type: date
+      rollback:
+        - dropTable:
+            tableName: passport

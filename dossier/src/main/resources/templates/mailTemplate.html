@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Arial', 'sans-serif';
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Уважаемый клиент!</h1>
+    <p th:text="${payload.getContentText()}">Default text</p>
+    <br>
+    <div th:if="${payload.getLinkForClient() != null}">
+            <p>Ссылка на оформление документов - <a th:href="${payload.getLinkForClient()}">Перейти</a></p>
+    </div>
+    <br>
+    <p>С Уважением, NEO BANK!</p>
+</body>
+</html>

@@ -47,3 +47,6 @@ databaseChangeLog:
               - column:
                   name: credit_status
                   type: varchar
+      rollback:
+        - dropTable:
+            tableName: credit

@@ -1,12 +1,12 @@
 package ru.neoflex.deal.controllers;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
 import ru.neoflex.deal.model.dto.FinishRegistrationRequestDto;
 import ru.neoflex.deal.model.dto.LoanOfferDTO;
 import ru.neoflex.deal.model.dto.LoanStatementRequestDTO;
+import ru.neoflex.deal.model.dto.StatementDTO;
 import ru.neoflex.deal.services.CalculateService;
 import ru.neoflex.deal.services.StatementService;
 
@@ -28,7 +28,7 @@ public class DealController implements DealControllerApi {
 
     @Override
     public void select(LoanOfferDTO loanOfferDTO) {
-        statementService.updateStatement(loanOfferDTO);
+        statementService.updateStatement(statementService.getStatementById(loanOfferDTO.getStatementId()), loanOfferDTO);
     }
 
     @Override
@@ -36,4 +36,8 @@ public class DealController implements DealControllerApi {
         calculateService.calculateCredit(UUID.fromString(statementId), finishRegistrationRequestDto);
     }
 
+    @Override
+    public StatementDTO statementData(String statementId) {
+        return statementService.getStatementDTO(UUID.fromString(statementId));
+    }
 }

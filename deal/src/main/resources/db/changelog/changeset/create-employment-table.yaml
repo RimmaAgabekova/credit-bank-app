@@ -35,3 +35,6 @@ databaseChangeLog:
               - column:
                   name: work_experience_current
                   type: int
+      rollback:
+        - dropTable:
+            tableName: employment

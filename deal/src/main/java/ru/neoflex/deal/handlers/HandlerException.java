@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.neoflex.deal.exception.DeniedException;
+import ru.neoflex.deal.exception.SesCodeException;
 
 import java.util.List;
 
@@ -26,7 +28,18 @@ public class HandlerException {
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiErrorResponse handlerException(Exception ex) {
+    public ApiErrorResponse handlerNotFoundException(Exception ex) {
+
+        final List<AppError> message = List.of(
+                new AppError("Error", ex.getMessage()));
+
+        log.error(ex.getMessage());
+        return new ApiErrorResponse(message);
+    }
+
+    @ExceptionHandler({SesCodeException.class, DeniedException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrorResponse handlerDealException(Exception ex) {
 
         final List<AppError> message = List.of(
                 new AppError("Error", ex.getMessage()));
