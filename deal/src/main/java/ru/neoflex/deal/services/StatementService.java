@@ -15,6 +15,7 @@ import ru.neoflex.deal.model.dto.*;
 import ru.neoflex.deal.models.Statement;
 import ru.neoflex.deal.repositories.StatementRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,6 +71,16 @@ public class StatementService {
 
     public StatementDTO getStatementDTO(UUID statementId) {
         return statementDTOMapper.statementToStatementDto(getStatementById(statementId));
+    }
+
+    public List<StatementDTO> getAllStatements() {
+        List<Statement> statements = statementRepository.findAll();
+
+        List<StatementDTO> statementDTOS = new ArrayList<>();
+
+        statements.forEach((statement) -> statementDTOS.add(statementDTOMapper.statementToStatementDto(statement)));
+
+        return statementDTOS;
     }
 
     public Statement save(Statement statement) {

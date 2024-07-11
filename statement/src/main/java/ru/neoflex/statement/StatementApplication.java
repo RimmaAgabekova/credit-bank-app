@@ -9,7 +9,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableFeignClients
 public class StatementApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(StatementApplication.class, args);
         log.info("Микросервис statement запущен");

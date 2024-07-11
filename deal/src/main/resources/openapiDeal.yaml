@@ -72,7 +72,7 @@ paths:
   /api/v1/deal/document/{statementId}/send:
     post:
       tags:
-        -  DocumentController
+        - DocumentController
       summary: запрос на отправку документов
       operationId: send
       parameters:
@@ -88,10 +88,10 @@ paths:
         400:
           description: некорректные данные
 
-  /api/v1/deal/document/{statementId}/sign :
+  /api/v1/deal/document/{statementId}/sign:
     post:
       tags:
-        -  DocumentController
+        - DocumentController
       summary: запрос на подписание документов
       operationId: sign
       parameters:
@@ -110,7 +110,7 @@ paths:
   /api/v1/deal/document/{statementId}/code:
     post:
       tags:
-        -  DocumentController
+        - DocumentController
       summary: подписание документов
       operationId: code
       parameters:
@@ -135,7 +135,7 @@ paths:
   /api/v1/deal/admin/statement/{statementId}/status:
     put:
       tags:
-        - StatusController
+        - AdminController
       summary: обновление статуса
       operationId: status
       parameters:
@@ -179,6 +179,48 @@ paths:
                 $ref: '#/components/schemas/StatementDTO'
         400:
           description: некорректные данные
+
+  /api/v1/deal/admin/statement/{statementId}:
+    get:
+      tags:
+        - AdminController
+      summary: получить заявку по id
+      operationId: getStatementId
+      parameters:
+        - name: statementId
+          in: path
+          description: id заявки
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: успешно
+        400:
+          description: некорректные данные
+        404:
+          description: не найдено
+
+  /api/v1/deal/admin/statement:
+    get:
+      tags:
+        - AdminController
+      summary: получить все заявки
+      operationId: getAllStatement
+      responses:
+        200:
+          description: успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/StatementDTO'
+        400:
+          description: некорректные данные
+        404:
+          description: не найдено
+
 
 components:
   requestBodies:
@@ -254,6 +296,16 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/StatementStatus'
+
+
+    adminRequest:
+      description: получить все заявки.
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatementDTO'
+
 
   schemas:
     LoanStatementRequestDTO:
@@ -666,7 +718,7 @@ components:
       description: Статус заявления
 
     EmailMessage:
-      title:  Сообщение электронной почты
+      title: Сообщение электронной почты
       type: object
       description: Электронная почта для отправки данных в микросервис Досье
       properties:
