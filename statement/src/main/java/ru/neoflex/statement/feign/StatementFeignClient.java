@@ -13,7 +13,7 @@ public interface StatementFeignClient {
     @PostMapping(value = "/api/v1/deal/statement")
     List<LoanOfferDTO> statement(LoanStatementRequestDTO loanStatementRequestDTO);
 
-    @PostMapping(value = "/api/v1/deal/offer/select ")
+    @PostMapping(value = "/api/v1/deal/offer/select")
     void select(LoanOfferDTO loanOfferDTO);
 
 }

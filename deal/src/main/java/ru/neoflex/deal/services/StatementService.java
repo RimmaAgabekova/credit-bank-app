@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.neoflex.deal.exception.DeniedException;
 import ru.neoflex.deal.feign.CalculatorFeignClient;
-import ru.neoflex.deal.mappers.ClientMapper;
-import ru.neoflex.deal.mappers.StatementDTOMapper;
-import ru.neoflex.deal.mappers.StatementMapper;
-import ru.neoflex.deal.mappers.StatementStatusHistoryMapper;
+import ru.neoflex.deal.mappers.*;
 import ru.neoflex.deal.model.dto.*;
 import ru.neoflex.deal.models.Statement;
 import ru.neoflex.deal.repositories.StatementRepository;
@@ -31,6 +28,7 @@ public class StatementService {
     private final StatementDTOMapper statementDTOMapper;
     private final StatementMapper statementMapper;
     private final StatementStatusHistoryMapper statementStatusHistoryMapper;
+    private final ListStatementDtoMapper listStatementDtoMapper;
 
     public List<LoanOfferDTO> createStatement(LoanStatementRequestDTO request) {
         log.info("Пришли данные по заявке = {}", request);
@@ -72,8 +70,12 @@ public class StatementService {
         return statementDTOMapper.statementToStatementDto(getStatementById(statementId));
     }
 
+    public List<StatementDTO> getAllStatements() {
+        List<Statement> statements = statementRepository.findAll();
+        return listStatementDtoMapper.toStatementDtoList(statements);
+    }
+
     public Statement save(Statement statement) {
         return statementRepository.saveAndFlush(statement);
     }
-
 }

@@ -4,15 +4,15 @@ info:
   version: 1.0.1
 
 servers:
-  - url: http://localhost:8081/
+  - url: http://localhost:8085/
 
 paths:
 
-  /api/v1/deal/statement:
+  /api/v1/statement:
     post:
       tags:
-        - DealController
-      summary: расчёт возможных условий кредита
+        - GatewayController
+      summary: создание кредитной заявки
       operationId: statement
       requestBody:
         $ref: '#/components/requestBodies/statementRequest'
@@ -30,10 +30,10 @@ paths:
         404:
           description: не найдено
 
-  /api/v1/deal/offer/select:
+  /api/v1/statement/select:
     post:
       tags:
-        - DealController
+        - GatewayController
       summary: выбор одного из предложений
       operationId: select
       requestBody:
@@ -46,12 +46,12 @@ paths:
         404:
           description: не найдено
 
-  /api/v1/deal/calculate/{statementId}:
+  /api/v1/statement/registration/{statementId}:
     post:
       tags:
-        - DealController
+        - GatewayController
       summary: завершение регистрации + полный подсчёт кредита
-      operationId: calculate
+      operationId: registration
       parameters:
         - name: statementId
           in: path
@@ -69,12 +69,12 @@ paths:
         404:
           description: не найдено
 
-  /api/v1/deal/document/{statementId}/send:
+  /api/v1/document/{statementId}:
     post:
       tags:
-        - DocumentController
-      summary: запрос на отправку документов
-      operationId: send
+        - GatewayController
+      summary: создание документов
+      operationId: create
       parameters:
         - name: statementId
           in: path
@@ -88,10 +88,10 @@ paths:
         400:
           description: некорректные данные
 
-  /api/v1/deal/document/{statementId}/sign:
+  /api/v1/document/{statementId}/sign:
     post:
       tags:
-        - DocumentController
+        - GatewayController
       summary: запрос на подписание документов
       operationId: sign
       parameters:
@@ -107,11 +107,11 @@ paths:
         400:
           description: некорректные данные
 
-  /api/v1/deal/document/{statementId}/code:
+  /api/v1/document/{statementId}/sign/code:
     post:
       tags:
-        - DocumentController
-      summary: подписание документов
+        - GatewayController
+      summary: подписание документов с использованием кода
       operationId: code
       parameters:
         - name: statementId
@@ -129,93 +129,6 @@ paths:
       responses:
         200:
           description: успешно
-        400:
-          description: некорректные данные
-
-  /api/v1/deal/admin/statement/{statementId}/status:
-    put:
-      tags:
-        - AdminController
-      summary: обновление статуса
-      operationId: status
-      parameters:
-        - name: statementId
-          in: path
-          description: id заявки
-          required: true
-          schema:
-            type: string
-        - name: newStatus
-          in: query
-          description: введите новый статус
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: успешно
-        400:
-          description: некорректные данные
-
-  /api/v1/deal/admin/statement/{statementId}/statement-data:
-    get:
-      tags:
-        - DealController
-      summary: Получение данных по заявке
-      operationId: statementData
-      parameters:
-        - name: statementId
-          in: path
-          description: id заявки
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: успешно
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StatementDTO'
-        400:
-          description: некорректные данные
-
-  /api/v1/deal/admin/statement/{statementId}:
-    get:
-      tags:
-        - AdminController
-      summary: получить заявку по id
-      operationId: getStatementId
-      parameters:
-        - name: statementId
-          in: path
-          description: id заявки
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: успешно
-        400:
-          description: некорректные данные
-        404:
-          description: не найдено
-
-  /api/v1/deal/admin/statement:
-    get:
-      tags:
-        - AdminController
-      summary: получить все заявки
-      operationId: getAllStatement
-      responses:
-        200:
-          description: успешно
-          content:
-            application/json:
-              schema:
-                type: object
-                items:
-                  $ref: '#/components/schemas/StatementDTO'
         400:
           description: некорректные данные
 
@@ -285,24 +198,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/EmailMessage'
-
-    statusRequest:
-      description: обновление статуса.
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/StatementStatus'
-
-
-    adminRequest:
-      description: получить все заявки.
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/StatementDTO'
-
 
   schemas:
     LoanStatementRequestDTO:

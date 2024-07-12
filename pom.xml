@@ -15,6 +15,7 @@
         <module>deal</module>
         <module>dossier</module>
         <module>statement</module>
+        <module>gateway</module>
     </modules>
 
     <properties>

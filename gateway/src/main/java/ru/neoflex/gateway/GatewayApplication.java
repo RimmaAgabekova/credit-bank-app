@@ -1,16 +1,17 @@
-package ru.neoflex.statement;
+package ru.neoflex.gateway;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@Slf4j
 @SpringBootApplication
 @EnableFeignClients
-public class StatementApplication {
+@Slf4j
+public class GatewayApplication {
+
     public static void main(String[] args) {
-        SpringApplication.run(StatementApplication.class, args);
-        log.info("Микросервис statement запущен");
+        SpringApplication.run(GatewayApplication.class, args);
+        log.info("Микросервис Gateway запущен" );
     }
 }
