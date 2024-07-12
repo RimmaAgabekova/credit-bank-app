@@ -218,9 +218,6 @@ paths:
                   $ref: '#/components/schemas/StatementDTO'
         400:
           description: некорректные данные
-        404:
-          description: не найдено
-
 
 components:
   requestBodies:

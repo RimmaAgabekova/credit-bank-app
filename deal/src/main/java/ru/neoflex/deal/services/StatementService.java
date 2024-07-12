@@ -15,9 +15,9 @@ import ru.neoflex.deal.model.dto.*;
 import ru.neoflex.deal.models.Statement;
 import ru.neoflex.deal.repositories.StatementRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -74,17 +74,13 @@ public class StatementService {
     }
 
     public List<StatementDTO> getAllStatements() {
-        List<Statement> statements = statementRepository.findAll();
-
-        List<StatementDTO> statementDTOS = new ArrayList<>();
-
-        statements.forEach((statement) -> statementDTOS.add(statementDTOMapper.statementToStatementDto(statement)));
-
-        return statementDTOS;
+        return statementRepository.findAll()
+                .stream()
+                .map(statementDTOMapper::statementToStatementDto)
+                .collect(Collectors.toList());
     }
 
     public Statement save(Statement statement) {
         return statementRepository.saveAndFlush(statement);
     }
-
 }
