@@ -1,14 +1,8 @@
 package ru.neoflex.calculator.services;
 
-import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import ru.neoflex.calculator.exceptions.ScoringException;
 import ru.neoflex.calculator.model.dto.EmploymentDTO;
 import ru.neoflex.calculator.model.dto.ScoringDataDTO;
@@ -16,7 +10,8 @@ import ru.neoflex.calculator.model.dto.ScoringDataDTO;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static ru.neoflex.calculator.model.dto.EmploymentDTO.EmploymentStatusEnum.*;
 import static ru.neoflex.calculator.model.dto.EmploymentDTO.PositionEnum.MID_MANAGER;
 import static ru.neoflex.calculator.model.dto.EmploymentDTO.PositionEnum.TOP_MANAGER;
@@ -107,7 +102,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    public void testWhenGenderMale()  {
+    public void testWhenGenderMale() {
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", MALE, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), TOP_MANAGER, 20, 20), "12312", true, true);
@@ -117,7 +112,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    public void testWhenGenderNonBinary()  {
+    public void testWhenGenderNonBinary() {
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", NON_BINARY, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), TOP_MANAGER, 20, 20), "12312", true, true);
@@ -127,7 +122,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    public void testWhenMaritalStatusDivorced()  {
+    public void testWhenMaritalStatusDivorced() {
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", MALE, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", DIVORCED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), TOP_MANAGER, 20, 20), "12312", true, true);
@@ -137,7 +132,7 @@ class ScoringServiceTest {
     }
 
     @Test
-    public void testWhenPositionMidManager()  {
+    public void testWhenPositionMidManager() {
         ScoringDataDTO scoringDataDTO = new ScoringDataDTO(BigDecimal.valueOf(300000), 6, "test", "test",
                 "test", FEMALE, LocalDate.now().minusYears(30), "1234", "123456", LocalDate.now(), "test", MARRIED,
                 0, new EmploymentDTO(EMPLOYED, "123", BigDecimal.valueOf(100000), MID_MANAGER, 20, 20), "12312", true, true);
@@ -159,11 +154,12 @@ class ScoringServiceTest {
 
         employment.setWorkExperienceTotal(18);
         employment.setWorkExperienceCurrent(2);
-        scoringException = assertThrows(ScoringException.class, ()-> scoringService.executeScoring(scoringData));
+        scoringException = assertThrows(ScoringException.class, () -> scoringService.executeScoring(scoringData));
         assertEquals(employmentCurrentException, scoringException.getMessage());
     }
+
     @Test
-    void testEmploymentSalary(){
+    void testEmploymentSalary() {
         String badSalary = "Отказ: Причина - заработная плата не соответсвует сумме займа клиента";
 
         scoringData.setAmount(new BigDecimal("1000000"));
@@ -172,8 +168,9 @@ class ScoringServiceTest {
         ScoringException scoringException = assertThrows(ScoringException.class, () -> scoringService.executeScoring(scoringData));
         assertEquals(badSalary, scoringException.getMessage());
     }
+
     @Test
-    void testAgeClients(){
+    void testAgeClients() {
         String badSalary = "Отказ: Причина - клиент не соответсвует возрасту выдачи кредитов";
         scoringData.setBirthdate(LocalDate.of(2005, 12, 12));
 
