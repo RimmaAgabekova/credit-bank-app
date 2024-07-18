@@ -1,6 +1,5 @@
 package ru.neoflex.calculator.services;
 
-import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import static com.jayway.jsonpath.internal.Utils.isTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -40,7 +38,7 @@ class OfferServiceTest {
     void setDataMocksObjects() {
         request.setAmount(BigDecimal.valueOf(100000));
         request.setTerm(36);
-        request.setBirthdate(LocalDate.of(2000,1,10));
+        request.setBirthdate(LocalDate.of(2000, 1, 10));
         request.setEmail("testemail@mail.ru");
         request.setFirstName("Тест");
         request.setLastName("Тестовый");
@@ -51,21 +49,16 @@ class OfferServiceTest {
 
     @Test
     void generateOffers() {
-
         BigDecimal amount = new BigDecimal("100000");
-
         List<LoanOfferDTO> loanOffers = offerService.generateOffers(request);
 
         assertEquals(4, loanOffers.size());
         assertEquals(amount, loanOffers.get(0).getRequestedAmount());
     }
+
     @Test
     void getLoanOffersErrorAgeTest() {
         request.setBirthdate(LocalDate.of(2010, 3, 8));
-        assertThrows(ScoringException.class, () -> {
-            offerService.generateOffers(request);
-        });
+        assertThrows(ScoringException.class, () -> offerService.generateOffers(request));
     }
-
-
 }

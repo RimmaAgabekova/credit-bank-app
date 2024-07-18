@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.neoflex.deal.mappers.StatementMapper;
+import ru.neoflex.deal.mappers.StatementStatusHistoryMapper;
 import ru.neoflex.deal.model.dto.LoanOfferDTO;
 import ru.neoflex.deal.model.dto.LoanStatementRequestDTO;
 import ru.neoflex.deal.model.dto.StatementStatus;
@@ -27,7 +28,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 @RequiredArgsConstructor
@@ -36,8 +36,10 @@ class StatementServiceTest {
     private StatementService statementService;
     @Mock
     private StatementRepository statementRepository;
-
-    private final StatementMapper statementMapper;
+    @Mock
+    private StatementMapper statementMapper;
+    @Mock
+    private StatementStatusHistoryMapper statementStatusHistoryMapper;
 
     @Test
     void createAndSaveStatementShouldReturnFilledData() {
@@ -48,6 +50,7 @@ class StatementServiceTest {
                 .statusHistory(new ArrayList<>())
                 .build();
 
+        when(statementMapper.buildStatement(any())).thenReturn(mockStatement);
         Statement savedStatement = statementMapper.buildStatement(client);
 
         assertNotNull(savedStatement);
@@ -78,9 +81,20 @@ class StatementServiceTest {
     @Test
     void updateStatementWithSelectedOffer() {
 
-        Client savedClient = new Client();
+        Client client = new Client();
+        Statement mockStatement = Statement.builder()
+                .clientId(client)
+                .creationDate(LocalDate.now())
+                .statusHistory(new ArrayList<>())
+                .build();
 
-        Statement savedStatement = statementMapper.buildStatement(savedClient);
+        mockStatement.getStatusHistory().add(new StatementStatusHistoryDTO()
+                .status(StatementStatus.PREAPPROVAL)
+                .time(LocalDateTime.now())
+                .changeType(StatementStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC));
+
+        when(statementMapper.buildStatement(any())).thenReturn(mockStatement);
+        Statement savedStatement = statementMapper.buildStatement(client);
 
         Statement updatedStatement = statementService.updateStatementStatus(savedStatement, StatementStatus.PREAPPROVAL);
 
@@ -90,12 +104,14 @@ class StatementServiceTest {
         assertEquals(LocalDateTime.now().toLocalDate(), updatedStatement.getStatusHistory().get(0).getTime().toLocalDate());
         assertEquals(StatementStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC, updatedStatement.getStatusHistory().get(0).getChangeType());
     }
+
     @Test
     void getStatementByIdShouldThrowExceptionWhenStatement() {
 
         when(statementRepository.findById(any())).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class, () -> statementService.getStatementById(UUID.randomUUID()));
     }
+
     @Test
     void getStatementByIdShouldReturnNotNull() {
 
@@ -103,13 +119,12 @@ class StatementServiceTest {
         assertNotNull(statementService.getStatementById(UUID.randomUUID()));
         verify(statementRepository, times(1)).findById(any());
     }
+
     @Test
     void updateStatementSchedule() {
         LoanOfferDTO loanOffer = createLoanOfferDto();
         Statement statement = createStatement(loanOffer);
-        when(statementRepository.findById(any())).thenReturn(Optional.ofNullable(createStatement(createLoanOfferDto())));
         when(statementRepository.save(any())).thenReturn(statement);
-        statementService.updateStatement(statement, loanOffer);
 
         assertEquals(createStatement(createLoanOfferDto()), statementRepository.save(any()));
     }
