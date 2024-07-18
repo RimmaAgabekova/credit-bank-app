@@ -23,3 +23,69 @@ services:
     depends_on:
       - zookeeper
 
+  calculator:
+    build: calculator
+    container_name: calculator
+    ports:
+      - "8080:8080"
+
+  deal:
+    build: deal
+    container_name: deal
+    depends_on:
+      - kafka
+      - database
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/projectNeoflex
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=sabrina
+      - KAFKA_SERVERS=http://kafka:9092/
+      - CALCULATOR_URL=http://localhost:8080/
+    links:
+      - database
+
+  database:
+    image: postgres:13.12-alpine3.18
+    container_name: database
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=projectNeoflex
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=sabrina
+
+  statement:
+    build: statement
+    container_name: statement
+    ports:
+      - "8082:8082"
+    environment:
+      - DEAL_URL=http://localhost:8081/
+
+  dossier:
+    build: dossier
+    container_name: dossier
+    depends_on:
+      - kafka
+      - deal
+    ports:
+      - "8083:8083"
+    environment:
+      - KAFKA_SERVERS=http://kafka:9092/
+      - DEAL_URL=http://localhost:8081/
+    env_file:
+      - secret.env
+
+  gateway:
+    build: gateway
+    container_name: gateway
+    depends_on:
+      - deal
+      - statement
+    ports:
+      - "8084:8084"
+    environment:
+      - DEAL_URL=http://localhost:8081/
+      - STATEMENT_URL=http://localhost:8083/
