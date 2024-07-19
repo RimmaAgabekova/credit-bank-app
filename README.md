@@ -1,4 +1,4 @@
-[![codecov](https://codecov.io/gh/RimmaAgabekova/credit-bank-app/graph/badge.svg?token=5D7UXC14UC)](https://codecov.io/gh/RimmaAgabekova/credit-bank-app)
+[![codecov](https://codecov.io/gh/RimmaAgabekova/credit-bank-app/branch/develop/graph/badge.svg?token=5D7UXC14UC)](https://codecov.io/gh/RimmaAgabekova/credit-bank-app)
 
 # «CREDIT BANK APP»
 
