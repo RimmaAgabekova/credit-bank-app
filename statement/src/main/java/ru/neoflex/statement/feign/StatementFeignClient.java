@@ -7,7 +7,7 @@ import ru.neoflex.statement.model.dto.LoanStatementRequestDTO;
 
 import java.util.List;
 
-@FeignClient(value = "deal", url = "http://localhost:8081")
+@FeignClient(value = "deal", url = "${DEAL.URL}")
 public interface StatementFeignClient {
 
     @PostMapping(value = "/api/v1/deal/statement")

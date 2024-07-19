@@ -9,7 +9,7 @@ import ru.neoflex.deal.model.dto.ScoringDataDTO;
 
 import java.util.List;
 
-@FeignClient(value = "calculator", url = "http://localhost:8080")
+@FeignClient(value = "calculator", url = "${CALCULATOR.URL}")
 public interface CalculatorFeignClient{
 
     @PostMapping(value = "/api/v1/calculator/offers")

@@ -9,17 +9,17 @@ services:
   kafka:
     image: obsidiandynamics/kafka
     container_name: kafka
+    hostname: kafka
     ports:
-      - "9092:9092"
+      - "29092:9092"
     environment:
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER_INTERNAL:PLAINTEXT,DOCKER_EXTERNAL:PLAINTEXT
-      KAFKA_LISTENERS: DOCKER_INTERNAL://:29092,DOCKER_EXTERNAL://:9092
-      KAFKA_ADVERTISED_LISTENERS: DOCKER_INTERNAL://kafka:29092,DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
-      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER_INTERNAL
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
     depends_on:
       - zookeeper
 
@@ -41,8 +41,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/projectNeoflex
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=sabrina
-      - KAFKA_SERVERS=http://kafka:9092/
-      - CALCULATOR_URL=http://localhost:8080/
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - CALCULATOR_URL=http://calculator:8080
     links:
       - database
 
@@ -59,10 +59,11 @@ services:
   statement:
     build: statement
     container_name: statement
+    hostname: statement
     ports:
       - "8082:8082"
     environment:
-      - DEAL_URL=http://localhost:8081/
+      - DEAL_URL=http://deal:8081
 
   dossier:
     build: dossier
@@ -73,8 +74,8 @@ services:
     ports:
       - "8083:8083"
     environment:
-      - KAFKA_SERVERS=http://kafka:9092/
-      - DEAL_URL=http://localhost:8081/
+      - DEAL_URL=http://deal:8081
+      - KAFKA_SERVER=kafka:9092
     env_file:
       - secret.env
 
@@ -87,5 +88,5 @@ services:
     ports:
       - "8084:8084"
     environment:
-      - DEAL_URL=http://localhost:8081/
-      - STATEMENT_URL=http://localhost:8083/
+      - DEAL_URL=http://deal:8081
+      - STATEMENT_URL=http://statement:8082

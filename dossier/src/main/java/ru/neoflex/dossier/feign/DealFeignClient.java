@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.neoflex.dossier.model.dto.StatementDTO;
 
-@FeignClient(url = "http://localhost:8081", name = "deal")
+@FeignClient(url = "${DEAL.URL}", name = "deal")
 public interface DealFeignClient {
 
     @PutMapping( "/api/v1/deal/admin/statement/{statementId}/status")

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import ru.neoflex.gateway.model.dto.FinishRegistrationRequestDto;
 
-@FeignClient(url = "http://localhost:8081", name = "deal")
+@FeignClient(url = "${DEAL.URL}", name = "deal")
 public interface DealFeignClient {
 
     @PostMapping("/api/v1/deal/calculate/{statementId}")
