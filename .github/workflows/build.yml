@@ -38,9 +38,25 @@ jobs:
 
       - name: Build MS-statement with Maven
         run: mvn -B clean package --file ./statement/pom.xml
+      - name: Unit Tests Statement
+        working-directory: statement
+        run: mvn -B verify --file pom.xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          flags: statement
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Build MS-calculator with Maven
         run: mvn -B clean package --file ./calculator/pom.xml
+      - name: Unit Tests Calculator
+        working-directory: calculator
+        run: mvn -B verify --file pom.xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          flags: calculator
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Build MS-deal with Maven
         run: mvn -B clean package --file ./deal/pom.xml
