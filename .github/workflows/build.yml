@@ -46,6 +46,12 @@ jobs:
         with:
           flags: statement
           token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Build and analyze statement
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        working-directory: statement
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=RimmaAgabekova_credit-bank-app
 
       - name: Build MS-calculator with Maven
         run: mvn -B clean package --file ./calculator/pom.xml
@@ -57,6 +63,12 @@ jobs:
         with:
           flags: calculator
           token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Build and analyze calculator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        working-directory: calculator
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=RimmaAgabekova_credit-bank-app
 
       - name: Build MS-deal with Maven
         run: mvn -B clean package --file ./deal/pom.xml
@@ -68,9 +80,27 @@ jobs:
         with:
           flags: deal
           token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Build and analyze deal
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        working-directory: deal
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=RimmaAgabekova_credit-bank-app
 
       - name: Build MS-dossier with Maven
         run: mvn -B clean package --file ./dossier/pom.xml
+      - name: Build and analyze dossier
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        working-directory: dossier
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=RimmaAgabekova_credit-bank-app
 
       - name: Build MS-gateway with Maven
         run: mvn -B clean package --file ./gateway/pom.xml
+      - name: Build and analyze gateway
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        working-directory: gateway
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=RimmaAgabekova_credit-bank-app
