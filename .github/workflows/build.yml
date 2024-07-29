@@ -60,6 +60,14 @@ jobs:
 
       - name: Build MS-deal with Maven
         run: mvn -B clean package --file ./deal/pom.xml
+      - name: Unit Tests Deal
+        working-directory: deal
+        run: mvn -B verify --file pom.xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          flags: deal
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Build MS-dossier with Maven
         run: mvn -B clean package --file ./dossier/pom.xml
