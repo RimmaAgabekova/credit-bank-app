@@ -20,6 +20,8 @@
         <postgresql.version>42.7.3</postgresql.version>
         <liquibase-core.version>4.24.0</liquibase-core.version>
         <hibernate-validator.version>6.1.6.Final</hibernate-validator.version>
+        <sonar.organization>rimma-agabekova</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
     <dependencies>
         <dependency>
